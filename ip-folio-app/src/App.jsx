@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   LayoutGrid, ShieldCheck, FileText, Stamp, Lightbulb, Clock, Layers,
   Plus, X, User, Building2, Calendar, Hash, MapPin, Scale, Sparkles,
-  AlertTriangle, LogOut, ArrowRight
+  AlertTriangle, LogOut, ArrowRight, BookOpen
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
@@ -47,12 +47,71 @@ const PRODUCTS = [
 ];
 const OWNERSHIP_NOTE = "Estructura actual: toda la PI es de Altinium Invest SRL, salvo las 21 patentes provisionales G5, que son de Ikenga.eu SL. Plan: transferir la PI de Altinium Invest SRL a Ikenga.eu SL.";
 
+const flagCls = (f) => {
+  const x = (f || "").toLowerCase();
+  if (x.includes("urgente")) return "bg-rose-100 text-rose-700";
+  if (x.includes("registrad")) return "bg-emerald-100 text-emerald-700";
+  if (x.includes("pendiente") || x.includes("presentad")) return "bg-blue-100 text-blue-700";
+  return "bg-slate-100 text-slate-600";
+};
+const FAMILIES = [
+  { type: "trademark", title: "Marcas · 2", flag: "registrado",
+    meta: "Titular: Altinium Invest SRL · clases 9 y 42 · rep. Arochi & Lindner",
+    items: [
+      "ikenga — registrada · EUIPO 019222233 (concedida 22/01/2026, renueva 2035), extendida internacionalmente vía Madrid (ref. H26/001)",
+      "KINETIC SHIELD — registrada · EUIPO 019222238 (concedida 22/01/2026, renueva 2035), extendida internacionalmente vía Madrid (ref. H26/002)",
+    ],
+    note: "Otras marcas en curso (GROW PROTECT SUSTAIN IN THE 4IR, Terranode) y el nombre de la app Land Tool — pendientes de confirmar." },
+  { type: "patent", title: "Modelo de utilidad · 1", flag: "URGENTE",
+    meta: "OEPM · U202531782 · rep. Marina Gómez Calvo (Arochi & Lindner)",
+    items: [
+      "Dispositivo multifuncional distribuido (servicios eléctricos + de datos)",
+      "2ª acción oficial (3 jun) · BOPI 09/06/2026 · plazo de respuesta ~09/08/2026 (prorrogable 2 meses)",
+      "La OEPM objeta que varias reivindicaciones son de tipo proceso/software y sugiere valorar la conversión a patente de invención.",
+    ] },
+  { type: "patent", title: "Solicitud internacional PCT · 1", flag: "presentada",
+    meta: "Dispositivo Kinetic Shield · WIPO (PCT) · titular Altinium Invest SRL",
+    items: [
+      "«Distributed Multifunctional Device and Method...» — 27 reivindicaciones",
+      "Reivindica prioridad (Convenio de París) del modelo de utilidad español U202531782 (15/09/2025)",
+      "Entradas en fase nacional antes del plazo de 30 meses (15/03/2028) · ref. PCT/IB2026/053119",
+    ] },
+  { type: "copyright", title: "Copyright SIAE (Italia) · 3", flag: "registrado",
+    meta: "Titular: Altinium Invest SRL · autor: Cédric Bérard · renueva 2031",
+    items: [
+      "SSI Index 4.0 — Source Code · Rep. 2026/00869",
+      "SSI Index 4.0 — Technical Reference · Rep. 2026/00867",
+      "SSI Index 4.0 — Competitive Landscape · Rep. 2026/00868",
+      "Depósito de obra inédita (prueba de existencia y prioridad).",
+    ] },
+  { type: "copyright", title: "Copyright USCO (EE. UU.) · 35", flag: "pendiente",
+    meta: "Titular: Altinium Invest SRL · todos en estado «Open» (registro pendiente)",
+    items: [
+      "Familia SSI Index v4.0 / v4.0.2 — 34 casos · autor: Cédric Bérard",
+      "EE. UU., Canadá, Australia, Japón, Chile, España, Reino Unido, Alemania, Suiza, Austria, Francia, Polonia, Finlandia, Noruega, Suecia, Dinamarca, México + presentación combinada de 7 países (Corea, Colombia, Israel, Hungría, Eslovaquia, Costa Rica, Islandia)",
+      "Land & Energy Network Analyzer v33 — 1 caso · obra independiente (DSP de idoneidad de terreno para BESS)",
+      "Autores: Gianluca Raucci, Lorenzo Rossi y Dario Cosentino · «work made for hire».",
+    ] },
+  { type: "patent", title: "Patentes provisionales USPTO · familia G5 · 21", flag: "pendiente",
+    meta: "Titular: Ikenga.eu SL · inventor: Cédric Bérard · small entity · pro-se · prioridad 12 meses (vence may 2027)",
+    items: [
+      "Wave 0 (5): G5.1 arbitraje maestro · G5.2 IEC 61850-90-7 · G5.3 HMAC/anti-replay · G5.4 Lyapunov/ISS · G5.5 cambios de membresía",
+      "Wave 1 (5): G5.6 plataforma de fabricación · G5.7 multi-fractal-edge · G5.8 cross-substrate · G5.9 multi-EMS · G5.10 portabilidad HAL",
+      "Wave 2 (1): G5.11 MPC fractal cross-scale",
+      "Wave 3 (4): G5.12 solver QP adjunto · G5.13 hashing FNV-1a · G5.14 referencia jerárquica · G5.15 coste MPC red+cómputo",
+      "Wave 4 (2): G5.16 inversor de doble lazo · G5.17 BESS + carga de cómputo",
+      "Wave 5 (4): G5.18 demodulador SDFT · G5.19 SCR bayesiano · G5.20 detector OOD Mahalanobis · G5.21 supervisor dwell-counter",
+    ],
+    note: "Faltan por añadir los nº de solicitud USPTO de G5.2, G5.6 y G5.7 (recibo de presentación aún no disponible)." },
+];
+
 const NAV = [
   { key: "resumen", label: "Resumen", icon: LayoutGrid },
+  { key: "familia", label: "Por familia", icon: BookOpen },
   { key: "cartera", label: "Cartera", icon: Layers },
   { key: "consulta", label: "Consulta IA", icon: Sparkles },
 ];
-const TITLES = { resumen: "El ecosistema · cartera de PI", cartera: "Cartera · detalle de activos", consulta: "Consulta IA — Modo A" };
+const TITLES = { resumen: "El ecosistema · cartera de PI", familia: "Detalle por familia", cartera: "Cartera · detalle de activos", consulta: "Consulta IA — Modo A" };
 const DTYPES = ["", "us-grace-bar", "priority-12mo", "foreign-filing-30mo", "office-action-response", "copyright-timely-reg", "maintenance", "renewal", "other"];
 const ROUTE_FILTERS = [["all", "Todas"], ["patent", "Patentes"], ["copyright", "Copyright"], ["trademark", "Marcas"], ["trade-secret", "Secretos"]];
 
@@ -200,7 +259,7 @@ export default function App({ session }) {
   const stats = useMemo(() => {
     let granted = 0, filed = 0, audit = 0;
     assets.forEach((a) => { if (a.stage === "closed") granted++; else if (a.stage === "07_filing") filed++; else audit++; });
-    return { total: assets.length, granted, filed, audit };
+    return { total: granted + filed, granted, filed, audit };
   }, [assets]);
   const groups = useMemo(() => {
     const m = {};
@@ -307,6 +366,27 @@ export default function App({ session }) {
                 <AlertTriangle size={16} className="text-amber-600 mt-0.5 shrink-0" /><div>{OWNERSHIP_NOTE}</div>
               </div>
             </>
+          )}
+
+          {section === "familia" && (
+            <div className="grid lg:grid-cols-2 gap-4">
+              {FAMILIES.map((fam, i) => { const v = VEHICLES[fam.type] || VEHICLES.mixed;
+                return (
+                  <div key={i} className={`bg-white rounded-xl border border-slate-200 border-l-4 ${v.border} shadow-sm p-5`}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-bold text-slate-800">{fam.title}</h3>
+                      {fam.flag && <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${flagCls(fam.flag)}`}>{fam.flag}</span>}
+                    </div>
+                    <div className="text-xs italic text-slate-500 mt-1">{fam.meta}</div>
+                    <ul className="mt-3 space-y-1.5">
+                      {fam.items.map((it, j) => (
+                        <li key={j} className="text-sm text-slate-700 flex gap-2"><span className="text-slate-300 mt-1 shrink-0">•</span><span>{it}</span></li>
+                      ))}
+                    </ul>
+                    {fam.note && <div className="mt-3 text-xs text-slate-400 border-t border-slate-100 pt-2">{fam.note}</div>}
+                  </div>
+                ); })}
+            </div>
           )}
 
           {section === "cartera" && (
