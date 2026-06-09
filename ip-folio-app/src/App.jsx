@@ -128,7 +128,7 @@ function Chips({ value, onChange }) {
     <div className="flex flex-wrap gap-2 mb-4">
       {ROUTE_FILTERS.map(([k, l]) => (
         <button key={k} onClick={() => onChange(k)}
-          className={`text-xs font-semibold px-3 py-1 rounded-full border ${value === k ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"}`}>{l}</button>
+          className={`text-xs font-semibold px-3 py-1 rounded-full border ${value === k ? "bg-[#56689e] text-white border-[#56689e]" : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"}`}>{l}</button>
       ))}
     </div>
   );
@@ -191,7 +191,7 @@ function NewAssetModal({ onClose, onAdd }) {
   const [f, setF] = useState(blank);
   const set = (k, val) => setF((p) => ({ ...p, [k]: val }));
   const Field = ({ label, children }) => (<label className="block"><span className="text-xs font-semibold text-slate-500">{label}</span>{children}</label>);
-  const inputCls = "mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500";
+  const inputCls = "mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#56689e]";
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900 opacity-40" onClick={onClose} />
@@ -218,7 +218,7 @@ function NewAssetModal({ onClose, onAdd }) {
         <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-200">
           <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800">Cancel</button>
           <button onClick={() => { if (f.title.trim()) onAdd({ ...f, decision: (f.stage === "07_filing" || f.stage === "closed") ? "file" : "pending", benchmark_verdict: "n/a" }); }}
-            className="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Save</button>
+            className="px-4 py-2 text-sm font-semibold bg-[#56689e] text-white rounded-lg hover:bg-[#475680]">Save</button>
         </div>
       </div>
     </div>
@@ -272,7 +272,7 @@ export default function App({ session }) {
 
   const Section = ({ n, title, sub }) => (
     <div className="flex items-center gap-3 mt-8 mb-3">
-      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold shrink-0">{n}</span>
+      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#56689e] text-white text-xs font-bold shrink-0">{n}</span>
       <h2 className="font-bold text-slate-800">{title}</h2>
       <span className="text-xs text-slate-400">{sub}</span>
       <div className="flex-1 border-t border-slate-200" />
@@ -281,12 +281,12 @@ export default function App({ session }) {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-800" style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
-      <aside className="w-60 shrink-0 bg-gradient-to-b from-slate-900 to-indigo-950 text-slate-300 flex flex-col">
+      <aside className="w-60 shrink-0 bg-gradient-to-b from-slate-900 to-[#2a3450] text-slate-300 flex flex-col">
         <div className="px-5 py-5 border-b border-white/10"><div className="text-white font-bold text-lg leading-tight">IP&nbsp;Folio</div><div className="text-slate-400 text-xs">Altinium ecosystem · IP portfolio</div></div>
         <nav className="px-3 py-4"><div className="px-2 text-xs uppercase tracking-wider text-slate-500 mb-2">Main</div>
           <div className="space-y-1">{NAV.map((item) => { const Icon = item.icon; const on = section === item.key;
             return (<button key={item.key} onClick={() => { setSection(item.key); setSelected(null); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${on ? "bg-indigo-600 text-white font-semibold" : "hover:bg-white/10"}`}><Icon size={17} /> {item.label}</button>); })}</div>
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${on ? "bg-[#56689e] text-white font-semibold" : "hover:bg-white/10"}`}><Icon size={17} /> {item.label}</button>); })}</div>
         </nav>
         <div className="mt-auto px-5 py-4 text-xs text-slate-500 border-t border-white/10">Internal app · data in Supabase</div>
       </aside>
@@ -295,7 +295,7 @@ export default function App({ session }) {
         <div className="flex items-center justify-between px-8 py-5">
           <h1 className="text-2xl font-bold text-slate-800">{TITLES[section]}</h1>
           <div className="flex items-center gap-4">
-            <button onClick={() => setShowNew(true)} className="flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700"><Plus size={16} /> New asset</button>
+            <button onClick={() => setShowNew(true)} className="flex items-center gap-2 bg-[#56689e] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#475680]"><Plus size={16} /> New asset</button>
             <div className="flex items-center gap-2 text-sm text-slate-500"><User size={16} /> {session && session.user ? session.user.email : ""}</div>
             <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-700"><LogOut size={15} /> Sign out</button>
           </div>
@@ -317,7 +317,7 @@ export default function App({ session }) {
 
               <Section n="2" title="The portfolio in numbers" sub="overall status" />
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Kpi label="Assets in total" value={stats.total} accent="border-indigo-600" valueCls="text-indigo-600" />
+                <Kpi label="Assets in total" value={stats.total} accent="border-[#56689e]" valueCls="text-[#56689e]" />
                 <Kpi label="Granted / registered" value={stats.granted} accent="border-emerald-500" valueCls="text-emerald-600" />
                 <Kpi label="Filed / pending" value={stats.filed} accent="border-amber-500" valueCls="text-amber-600" />
                 <Kpi label="In audit / in progress" value={stats.audit} accent="border-slate-400" valueCls="text-slate-500" dashed />
@@ -358,7 +358,7 @@ export default function App({ session }) {
               <div className="grid md:grid-cols-2 gap-4">
                 {owners.slice(0, 4).map(([o, c], i) => (
                   <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-3">
-                    <Building2 size={18} className="text-indigo-500" />
+                    <Building2 size={18} className="text-[#56689e]" />
                     <div><div className="font-semibold text-slate-800">{o}</div><div className="text-xs text-slate-500">{c} asset(s)</div></div>
                   </div>
                 ))}
@@ -403,8 +403,8 @@ export default function App({ session }) {
           {section === "consult" && (
             <div className="max-w-2xl">
               <p className="text-sm text-slate-500 mb-3">Describe a creation: the app classifies the route, flags the clocks and suggests the next step. General screening, not legal advice.</p>
-              <textarea value={cInput} onChange={(e) => setCInput(e.target.value)} rows={4} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. A dog collar with a sensor and a proprietary algorithm that detects dehydration. I showed it at a trade fair on 10 March." />
-              <button onClick={runConsulta} disabled={cLoading} className="mt-3 flex items-center gap-2 bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"><Sparkles size={16} /> {cLoading ? "Analyzing…" : "Consult"}</button>
+              <textarea value={cInput} onChange={(e) => setCInput(e.target.value)} rows={4} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#56689e]" placeholder="e.g. A dog collar with a sensor and a proprietary algorithm that detects dehydration. I showed it at a trade fair on 10 March." />
+              <button onClick={runConsulta} disabled={cLoading} className="mt-3 flex items-center gap-2 bg-[#56689e] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#475680] disabled:opacity-50"><Sparkles size={16} /> {cLoading ? "Analyzing…" : "Consult"}</button>
               {cError && <div className="mt-4 bg-rose-50 border border-rose-200 rounded-lg p-3 text-sm text-slate-700 whitespace-pre-wrap">{cError}</div>}
               {cResult && (
                 <div className="mt-5 space-y-4">
