@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   LayoutGrid, ShieldCheck, FileText, Stamp, Lightbulb, Clock, Layers,
   Plus, X, User, Building2, Calendar, Hash, MapPin, Scale, Sparkles,
-  AlertTriangle, LogOut, ArrowRight, BookOpen
+  AlertTriangle, LogOut, ArrowRight, BookOpen, Newspaper, ExternalLink
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
@@ -108,9 +108,10 @@ const NAV = [
   { key: "overview", label: "Overview", icon: LayoutGrid },
   { key: "portfolio", label: "Portfolio", icon: BookOpen },
   { key: "assets", label: "Assets", icon: Layers },
+  { key: "reports", label: "Reports", icon: Newspaper },
   { key: "consult", label: "AI Consultation", icon: Sparkles },
 ];
-const TITLES = { overview: "The ecosystem · IP portfolio", portfolio: "Portfolio · detail by family", assets: "Assets · full register", consult: "AI Consultation — Mode A" };
+const TITLES = { overview: "The ecosystem · IP portfolio", portfolio: "Portfolio · detail by family", assets: "Assets · full register", reports: "Reports · supporting documents", consult: "AI Consultation — Mode A" };
 const DTYPES = ["", "us-grace-bar", "priority-12mo", "foreign-filing-30mo", "office-action-response", "copyright-timely-reg", "maintenance", "renewal", "other"];
 const ROUTE_FILTERS = [["all", "All"], ["patent", "Patents"], ["copyright", "Copyright"], ["trademark", "Trademarks"], ["trade-secret", "Trade secrets"]];
 
@@ -226,8 +227,58 @@ function NewAssetModal({ onClose, onAdd }) {
 }
 
 /* ---------- app ---------- */
+const DOC_TYPES = ["report", "paper", "filing", "methodology", "other"];
+function DocCard({ d }) {
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 border-l-4 border-[#44546A] p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <span className="bg-[#44546A] text-white rounded-md p-1.5 inline-flex"><Newspaper size={15} /></span>
+        <span className="text-xs text-slate-400 font-mono">{d.id}</span>
+      </div>
+      <div className="font-semibold text-slate-800 mt-2 leading-snug text-sm">{d.title}</div>
+      <div className="text-xs text-slate-500 mt-1">{[d.doc_type, d.authors, d.doc_date].filter(Boolean).join(" · ")}</div>
+      {d.notes ? <div className="text-xs text-slate-500 mt-2 leading-relaxed">{d.notes}</div> : null}
+      {d.url
+        ? <a href={d.url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#44546A] hover:underline"><ExternalLink size={14} /> Open document</a>
+        : <div className="mt-3 text-xs text-slate-400 italic">No link yet</div>}
+    </div>
+  );
+}
+function NewReportModal({ onClose, onAdd }) {
+  const [f, setF] = useState({ title: "", doc_type: "report", authors: "", doc_date: "", url: "", related_asset: "", notes: "" });
+  const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
+  const Field = ({ label, children }) => (<label className="block"><span className="text-xs font-semibold text-slate-500">{label}</span>{children}</label>);
+  const inputCls = "mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#44546A]";
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900 opacity-40" onClick={onClose} />
+      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-lg max-h-full overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200"><h2 className="font-bold text-slate-800">New report</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X size={20} /></button></div>
+        <div className="px-6 py-5 space-y-3">
+          <Field label="Title"><input className={inputCls} value={f.title} onChange={(e) => set("title", e.target.value)} /></Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Type"><select className={inputCls} value={f.doc_type} onChange={(e) => set("doc_type", e.target.value)}>{DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</select></Field>
+            <Field label="Date"><input type="date" className={inputCls} value={f.doc_date} onChange={(e) => set("doc_date", e.target.value)} /></Field>
+          </div>
+          <Field label="Authors"><input className={inputCls} value={f.authors} onChange={(e) => set("authors", e.target.value)} /></Field>
+          <Field label="Link (URL to the file)"><input className={inputCls} placeholder="https://…  (OneDrive / Drive / SharePoint)" value={f.url} onChange={(e) => set("url", e.target.value)} /></Field>
+          <Field label="Related asset (optional)"><input className={inputCls} value={f.related_asset} onChange={(e) => set("related_asset", e.target.value)} /></Field>
+          <Field label="Notes"><textarea className={inputCls} rows={2} value={f.notes} onChange={(e) => set("notes", e.target.value)} /></Field>
+        </div>
+        <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-200">
+          <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800">Cancel</button>
+          <button onClick={() => { if (f.title.trim()) onAdd(f); }} className="px-4 py-2 text-sm font-semibold bg-[#44546A] text-white rounded-lg hover:bg-[#374454]">Save</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App({ session }) {
   const [assets, setAssets] = useState([]);
+  const [docs, setDocs] = useState([]);
+  const [showNewDoc, setShowNewDoc] = useState(false);
   const [section, setSection] = useState("overview");
   const [selected, setSelected] = useState(null);
   const [showNew, setShowNew] = useState(false);
@@ -237,6 +288,14 @@ export default function App({ session }) {
 
   const load = async () => { const { data, error } = await supabase.from("assets").select("*"); if (!error && data) setAssets(data); };
   useEffect(() => { load(); }, []);
+  const loadDocs = async () => { const { data, error } = await supabase.from("documents").select("*"); if (!error && data) setDocs(data); };
+  useEffect(() => { loadDocs(); }, []);
+  const addDoc = async (d) => {
+    const id = `DOC-${String(docs.length + 1).padStart(3, "0")}`;
+    const { error } = await supabase.from("documents").insert([{ ...d, id, doc_date: d.doc_date || null }]);
+    if (error) { alert("Could not save: " + error.message); return; }
+    setShowNewDoc(false); loadDocs();
+  };
 
   const addAsset = async (a) => {
     const id = `IK-${String(assets.length + 1).padStart(3, "0")}`;
@@ -403,6 +462,17 @@ export default function App({ session }) {
             </>
           )}
 
+          {section === "reports" && (
+            <>
+              <div className="flex justify-end mb-4">
+                <button onClick={() => setShowNewDoc(true)} className="flex items-center gap-2 bg-[#44546A] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#374454]"><Plus size={16} /> New report</button>
+              </div>
+              {docs.length
+                ? <div className="grid sm:grid-cols-2 gap-4">{docs.map((d) => <DocCard key={d.id} d={d} />)}</div>
+                : <div className="text-sm text-slate-400 italic py-10 text-center">No reports yet. Use “New report” to add your first document.</div>}
+            </>
+          )}
+
           {section === "consult" && (
             <div className="max-w-2xl">
               <p className="text-sm text-slate-500 mb-3">Describe a creation: the app classifies the route, flags the clocks and suggests the next step. General screening, not legal advice.</p>
@@ -428,7 +498,7 @@ export default function App({ session }) {
 
       {selected && <Detail a={selected} onClose={() => setSelected(null)} />}
       {showNew && <NewAssetModal onClose={() => setShowNew(false)} onAdd={addAsset} />}
+      {showNewDoc && <NewReportModal onClose={() => setShowNewDoc(false)} onAdd={addDoc} />}
     </div>
   );
 }
-
