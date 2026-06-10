@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   LayoutGrid, ShieldCheck, FileText, Stamp, Lightbulb, Clock, Layers,
   Plus, X, User, Building2, Calendar, Hash, MapPin, Scale, Sparkles,
-  AlertTriangle, LogOut, ArrowRight, BookOpen, Newspaper, ExternalLink
+  AlertTriangle, LogOut, ArrowRight, BookOpen, Newspaper, ExternalLink, Globe, ArrowLeft
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
@@ -108,10 +108,11 @@ const NAV = [
   { key: "overview", label: "Overview", icon: LayoutGrid },
   { key: "portfolio", label: "Portfolio", icon: BookOpen },
   { key: "assets", label: "Assets", icon: Layers },
+  { key: "countries", label: "Countries", icon: Globe },
   { key: "reports", label: "Reports", icon: Newspaper },
   { key: "consult", label: "AI Consultation", icon: Sparkles },
 ];
-const TITLES = { overview: "The ecosystem · IP portfolio", portfolio: "Portfolio · detail by family", assets: "Assets · full register", reports: "Reports · supporting documents", consult: "AI Consultation — Mode A" };
+const TITLES = { overview: "The ecosystem · IP portfolio", portfolio: "Portfolio · detail by family", assets: "Assets · full register", countries: "Countries · SSI Index coverage", reports: "Reports · supporting documents", consult: "AI Consultation — Mode A" };
 const DTYPES = ["", "us-grace-bar", "priority-12mo", "foreign-filing-30mo", "office-action-response", "copyright-timely-reg", "maintenance", "renewal", "other"];
 const ROUTE_FILTERS = [["all", "All"], ["patent", "Patents"], ["copyright", "Copyright"], ["trademark", "Trademarks"], ["trade-secret", "Trade secrets"]];
 
@@ -275,10 +276,44 @@ function NewReportModal({ onClose, onAdd }) {
   );
 }
 
+function CountryChip({ c, onMove }) {
+  const reg = c.status === "registered";
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${reg ? "bg-[#44546A]/10 border-[#44546A]/30 text-[#44546A]" : "bg-[#7F7F7F]/12 border-[#7F7F7F]/40 text-[#5f5f5f]"}`}>
+      {c.name}
+      <button onClick={() => onMove(c)} title={reg ? "Move to: to register" : "Mark as registered"} className="opacity-40 hover:opacity-100">{reg ? <ArrowRight size={12} /> : <ArrowLeft size={12} />}</button>
+    </span>
+  );
+}
+function NewCountryModal({ onClose, onAdd }) {
+  const [f, setF] = useState({ name: "", status: "pending", notes: "" });
+  const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
+  const inputCls = "mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#44546A]";
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-slate-900 opacity-40" onClick={onClose} />
+      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-sm">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200"><h2 className="font-bold text-slate-800">Add country</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X size={20} /></button></div>
+        <div className="px-6 py-5 space-y-3">
+          <label className="block"><span className="text-xs font-semibold text-slate-500">Country</span><input className={inputCls} value={f.name} onChange={(e) => set("name", e.target.value)} /></label>
+          <label className="block"><span className="text-xs font-semibold text-slate-500">Status</span><select className={inputCls} value={f.status} onChange={(e) => set("status", e.target.value)}><option value="registered">Registered</option><option value="pending">To register</option></select></label>
+        </div>
+        <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-200">
+          <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800">Cancel</button>
+          <button onClick={() => { if (f.name.trim()) onAdd(f); }} className="px-4 py-2 text-sm font-semibold bg-[#44546A] text-white rounded-lg hover:bg-[#374454]">Save</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App({ session }) {
   const [assets, setAssets] = useState([]);
   const [docs, setDocs] = useState([]);
   const [showNewDoc, setShowNewDoc] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [showNewCountry, setShowNewCountry] = useState(false);
   const [section, setSection] = useState("overview");
   const [selected, setSelected] = useState(null);
   const [showNew, setShowNew] = useState(false);
@@ -290,6 +325,19 @@ export default function App({ session }) {
   useEffect(() => { load(); }, []);
   const loadDocs = async () => { const { data, error } = await supabase.from("documents").select("*"); if (!error && data) setDocs(data); };
   useEffect(() => { loadDocs(); }, []);
+  const loadCountries = async () => { const { data, error } = await supabase.from("countries").select("*"); if (!error && data) setCountries(data); };
+  useEffect(() => { loadCountries(); }, []);
+  const addCountry = async (c) => {
+    const id = `C-${String(countries.length + 1).padStart(3, "0")}`;
+    const { error } = await supabase.from("countries").insert([{ ...c, id }]);
+    if (error) { alert("Could not save: " + error.message); return; }
+    setShowNewCountry(false); loadCountries();
+  };
+  const toggleCountry = async (c) => {
+    const ns = c.status === "registered" ? "pending" : "registered";
+    const { error } = await supabase.from("countries").update({ status: ns }).eq("id", c.id);
+    if (!error) loadCountries();
+  };
   const addDoc = async (d) => {
     const id = `DOC-${String(docs.length + 1).padStart(3, "0")}`;
     const { error } = await supabase.from("documents").insert([{ ...d, id, doc_date: d.doc_date || null }]);
@@ -462,6 +510,26 @@ export default function App({ session }) {
             </>
           )}
 
+          {section === "countries" && (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-slate-500">SSI Index copyright coverage by country.</p>
+                <button onClick={() => setShowNewCountry(true)} className="flex items-center gap-2 bg-[#44546A] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#374454]"><Plus size={16} /> Add country</button>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-[#44546A] p-5 shadow-sm">
+                  <div className="flex items-center justify-between mb-3"><h3 className="font-bold text-slate-800">Registered</h3><span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#44546A]/12 text-[#44546A]">{countries.filter((c) => c.status === "registered").length}</span></div>
+                  <div className="flex flex-wrap gap-2">{countries.filter((c) => c.status === "registered").sort((a, b) => a.name.localeCompare(b.name)).map((c) => <CountryChip key={c.id} c={c} onMove={toggleCountry} />)}</div>
+                </div>
+                <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-[#7F7F7F] p-5 shadow-sm">
+                  <div className="flex items-center justify-between mb-3"><h3 className="font-bold text-slate-800">To register</h3><span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#7F7F7F]/15 text-[#5f5f5f]">{countries.filter((c) => c.status !== "registered").length}</span></div>
+                  <div className="flex flex-wrap gap-2">{countries.filter((c) => c.status !== "registered").sort((a, b) => a.name.localeCompare(b.name)).map((c) => <CountryChip key={c.id} c={c} onMove={toggleCountry} />)}</div>
+                  {countries.filter((c) => c.status !== "registered").length === 0 && <p className="text-xs text-slate-400 italic">None yet — add the countries you plan to register.</p>}
+                </div>
+              </div>
+            </>
+          )}
+
           {section === "reports" && (
             <>
               <div className="flex justify-end mb-4">
@@ -499,6 +567,7 @@ export default function App({ session }) {
       {selected && <Detail a={selected} onClose={() => setSelected(null)} />}
       {showNew && <NewAssetModal onClose={() => setShowNew(false)} onAdd={addAsset} />}
       {showNewDoc && <NewReportModal onClose={() => setShowNewDoc(false)} onAdd={addDoc} />}
+      {showNewCountry && <NewCountryModal onClose={() => setShowNewCountry(false)} onAdd={addCountry} />}
     </div>
   );
 }
