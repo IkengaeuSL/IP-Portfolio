@@ -18,11 +18,11 @@ const clean = (a) => {
 const normJur = (j) => { if (!j) return "—"; return String(j).split("—")[0].split("(")[0].trim() || "—"; };
 
 const VEHICLES = {
-  patent:         { label: "Patent",       chip: "bg-blue-600",    border: "border-blue-600",    tint: "bg-blue-50",    ring: "border-blue-200",    text: "text-blue-700",    icon: Lightbulb },
-  copyright:      { label: "Copyright",    chip: "bg-emerald-600", border: "border-emerald-600", tint: "bg-emerald-50", ring: "border-emerald-200", text: "text-emerald-700", icon: FileText },
-  trademark:      { label: "Trademark",    chip: "bg-violet-600",  border: "border-violet-600",  tint: "bg-violet-50",  ring: "border-violet-200",  text: "text-violet-700",  icon: Stamp },
-  "trade-secret": { label: "Trade secret", chip: "bg-slate-600",   border: "border-slate-600",   tint: "bg-slate-100",  ring: "border-slate-300",   text: "text-slate-700",   icon: ShieldCheck },
-  mixed:          { label: "Mixed",        chip: "bg-slate-400",   border: "border-slate-400",   tint: "bg-slate-50",   ring: "border-slate-200",   text: "text-slate-600",   icon: Building2 },
+  patent:         { label: "Patent",       chip: "bg-[#44546A]", border: "border-[#44546A]", tint: "bg-[#44546A]/10", ring: "border-[#44546A]/30", text: "text-[#44546A]", icon: Lightbulb },
+  copyright:      { label: "Copyright",    chip: "bg-[#7F7F7F]", border: "border-[#7F7F7F]", tint: "bg-[#7F7F7F]/12", ring: "border-[#7F7F7F]/30", text: "text-[#5f5f5f]", icon: FileText },
+  trademark:      { label: "Trademark",    chip: "bg-[#941100]", border: "border-[#941100]", tint: "bg-[#941100]/8",  ring: "border-[#941100]/30", text: "text-[#941100]", icon: Stamp },
+  "trade-secret": { label: "Trade secret", chip: "bg-[#374454]", border: "border-[#374454]", tint: "bg-[#374454]/10", ring: "border-[#374454]/30", text: "text-[#374454]", icon: ShieldCheck },
+  mixed:          { label: "Mixed",        chip: "bg-[#7F7F7F]", border: "border-[#7F7F7F]", tint: "bg-[#7F7F7F]/10", ring: "border-[#7F7F7F]/25", text: "text-[#5f5f5f]", icon: Building2 },
 };
 const STAGES = [
   { key: "01_disclosure", short: "Disclosure" }, { key: "02_classification", short: "Classification" },
@@ -33,25 +33,25 @@ const STAGES = [
 const sIdx = (k) => { const i = STAGES.findIndex((s) => s.key === k); return i < 0 ? 0 : i; };
 const statusOf = (a) => {
   const n = daysTo(a.key_deadline);
-  if (n !== null && n < 0) return { label: "Expired", cls: "bg-rose-100 text-rose-700" };
-  if (a.stage === "closed") return { label: "Registered / granted", cls: "bg-emerald-100 text-emerald-700" };
-  if (a.stage === "07_filing") return { label: "Filed / pending", cls: "bg-blue-100 text-blue-700" };
-  return { label: "In audit", cls: "bg-slate-100 text-slate-600" };
+  if (n !== null && n < 0) return { label: "Expired", cls: "bg-[#941100]/12 text-[#941100]" };
+  if (a.stage === "closed") return { label: "Registered / granted", cls: "bg-[#44546A]/12 text-[#44546A]" };
+  if (a.stage === "07_filing") return { label: "Filed / pending", cls: "bg-[#7F7F7F]/15 text-[#5f5f5f]" };
+  return { label: "In audit", cls: "bg-[#7F7F7F]/10 text-[#5f5f5f]" };
 };
 
 const PRODUCTS = [
-  { name: "SSI Index", tag: "the foundation", border: "border-t-blue-600", text: "text-blue-700", desc: "Scores the health of every electrical substation. Open grid-resilience framework (Monte Carlo). Base work of the entire copyright family." },
-  { name: "SSI-ENN", tag: "the analytical engine", border: "border-t-emerald-600", text: "text-emerald-700", desc: "Neural network that values how worthwhile it is to install a BESS at each substation. Layer 1 documentation, code and audits." },
-  { name: "KINETIC SHIELD™", tag: "the commercial product", border: "border-t-rose-600", text: "text-rose-700", desc: "Sovereign edge 'neocloud' · pairs HPC with the power grid · leased to investors. The device is protected by the PCT application; its control/coordination by the G5 patent family." },
+  { name: "SSI Index", tag: "the foundation", border: "border-t-[#44546A]", text: "text-[#44546A]", desc: "Scores the health of every electrical substation. Open grid-resilience framework (Monte Carlo). Base work of the entire copyright family." },
+  { name: "SSI-ENN", tag: "the analytical engine", border: "border-t-[#7F7F7F]", text: "text-[#7F7F7F]", desc: "Neural network that values how worthwhile it is to install a BESS at each substation. Layer 1 documentation, code and audits." },
+  { name: "KINETIC SHIELD™", tag: "the commercial product", border: "border-t-[#941100]", text: "text-[#941100]", desc: "Sovereign edge 'neocloud' · pairs HPC with the power grid · leased to investors. The device is protected by the PCT application; its control/coordination by the G5 patent family." },
 ];
 const OWNERSHIP_NOTE = "Current structure: all IP is held by Altinium Invest SRL, except the 21 G5 provisional patents, which are held by Ikenga.eu SL. Planned: transfer the IP held by Altinium Invest SRL to Ikenga.eu SL.";
 
 const flagCls = (f) => {
   const x = (f || "").toLowerCase();
-  if (x.includes("urgent")) return "bg-rose-100 text-rose-700";
-  if (x.includes("register")) return "bg-emerald-100 text-emerald-700";
-  if (x.includes("pending") || x.includes("filed")) return "bg-blue-100 text-blue-700";
-  return "bg-slate-100 text-slate-600";
+  if (x.includes("urgent")) return "bg-[#941100]/12 text-[#941100]";
+  if (x.includes("register")) return "bg-[#44546A]/12 text-[#44546A]";
+  if (x.includes("pending") || x.includes("filed")) return "bg-[#7F7F7F]/15 text-[#5f5f5f]";
+  return "bg-[#7F7F7F]/10 text-[#5f5f5f]";
 };
 const FAMILIES = [
   { type: "trademark", title: "Trademarks · 2", flag: "registered",
@@ -128,7 +128,7 @@ function Chips({ value, onChange }) {
     <div className="flex flex-wrap gap-2 mb-4">
       {ROUTE_FILTERS.map(([k, l]) => (
         <button key={k} onClick={() => onChange(k)}
-          className={`text-xs font-semibold px-3 py-1 rounded-full border ${value === k ? "bg-[#56689e] text-white border-[#56689e]" : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"}`}>{l}</button>
+          className={`text-xs font-semibold px-3 py-1 rounded-full border ${value === k ? "bg-[#44546A] text-white border-[#44546A]" : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"}`}>{l}</button>
       ))}
     </div>
   );
@@ -146,7 +146,7 @@ function AssetCard({ a, onClick }) {
       <div className="text-xs text-slate-500 mt-1">{v.label} · {a.jurisdiction || "—"}</div>
       <div className="mt-3 pt-2 border-t border-slate-100 text-xs flex items-center justify-between">
         <span className="text-slate-400 font-mono truncate">{a.registration_no || "no number"}</span>
-        {a.key_deadline ? <span className={n < 0 ? "text-rose-600 font-semibold" : n <= 90 ? "text-amber-600 font-semibold" : "text-slate-500"}>{n < 0 ? `${-n}d overdue` : `${n}d`}</span> : <span className="text-slate-300">no deadline</span>}
+        {a.key_deadline ? <span className={n < 0 ? "text-[#941100] font-semibold" : n <= 90 ? "text-[#941100] font-semibold" : "text-[#7F7F7F]"}>{n < 0 ? `${-n}d overdue` : `${n}d`}</span> : <span className="text-slate-300">no deadline</span>}
       </div>
     </button>
   );
@@ -191,7 +191,7 @@ function NewAssetModal({ onClose, onAdd }) {
   const [f, setF] = useState(blank);
   const set = (k, val) => setF((p) => ({ ...p, [k]: val }));
   const Field = ({ label, children }) => (<label className="block"><span className="text-xs font-semibold text-slate-500">{label}</span>{children}</label>);
-  const inputCls = "mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#56689e]";
+  const inputCls = "mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#44546A]";
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900 opacity-40" onClick={onClose} />
@@ -218,7 +218,7 @@ function NewAssetModal({ onClose, onAdd }) {
         <div className="flex justify-end gap-2 px-6 py-4 border-t border-slate-200">
           <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-800">Cancel</button>
           <button onClick={() => { if (f.title.trim()) onAdd({ ...f, decision: (f.stage === "07_filing" || f.stage === "closed") ? "file" : "pending", benchmark_verdict: "n/a" }); }}
-            className="px-4 py-2 text-sm font-semibold bg-[#56689e] text-white rounded-lg hover:bg-[#475680]">Save</button>
+            className="px-4 py-2 text-sm font-semibold bg-[#44546A] text-white rounded-lg hover:bg-[#374454]">Save</button>
         </div>
       </div>
     </div>
@@ -272,7 +272,7 @@ export default function App({ session }) {
 
   const Section = ({ n, title, sub }) => (
     <div className="flex items-center gap-3 mt-8 mb-3">
-      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#56689e] text-white text-xs font-bold shrink-0">{n}</span>
+      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#44546A] text-white text-xs font-bold shrink-0">{n}</span>
       <h2 className="font-bold text-slate-800">{title}</h2>
       <span className="text-xs text-slate-400">{sub}</span>
       <div className="flex-1 border-t border-slate-200" />
@@ -281,12 +281,12 @@ export default function App({ session }) {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-800" style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
-      <aside className="w-60 shrink-0 bg-gradient-to-b from-slate-900 to-[#2a3450] text-slate-300 flex flex-col">
+      <aside className="w-60 shrink-0 bg-gradient-to-b from-slate-900 to-[#374454] text-slate-300 flex flex-col">
         <div className="px-5 py-5 border-b border-white/10"><div className="text-white font-bold text-lg leading-tight">IP&nbsp;Folio</div><div className="text-slate-400 text-xs">Altinium ecosystem · IP portfolio</div></div>
         <nav className="px-3 py-4"><div className="px-2 text-xs uppercase tracking-wider text-slate-500 mb-2">Main</div>
           <div className="space-y-1">{NAV.map((item) => { const Icon = item.icon; const on = section === item.key;
             return (<button key={item.key} onClick={() => { setSection(item.key); setSelected(null); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${on ? "bg-[#56689e] text-white font-semibold" : "hover:bg-white/10"}`}><Icon size={17} /> {item.label}</button>); })}</div>
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${on ? "bg-[#44546A] text-white font-semibold" : "hover:bg-white/10"}`}><Icon size={17} /> {item.label}</button>); })}</div>
         </nav>
         <div className="mt-auto px-5 py-4 text-xs text-slate-500 border-t border-white/10">Internal app · data in Supabase</div>
       </aside>
@@ -295,7 +295,7 @@ export default function App({ session }) {
         <div className="flex items-center justify-between px-8 py-5">
           <h1 className="text-2xl font-bold text-slate-800">{TITLES[section]}</h1>
           <div className="flex items-center gap-4">
-            <button onClick={() => setShowNew(true)} className="flex items-center gap-2 bg-[#56689e] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#475680]"><Plus size={16} /> New asset</button>
+            <button onClick={() => setShowNew(true)} className="flex items-center gap-2 bg-[#44546A] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#374454]"><Plus size={16} /> New asset</button>
             <div className="flex items-center gap-2 text-sm text-slate-500"><User size={16} /> {session && session.user ? session.user.email : ""}</div>
             <button onClick={() => supabase.auth.signOut()} className="flex items-center gap-1 text-sm text-slate-400 hover:text-slate-700"><LogOut size={15} /> Sign out</button>
           </div>
@@ -317,10 +317,10 @@ export default function App({ session }) {
 
               <Section n="2" title="The portfolio in numbers" sub="overall status" />
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Kpi label="Assets in total" value={stats.total} accent="border-[#56689e]" valueCls="text-[#56689e]" />
-                <Kpi label="Granted / registered" value={stats.granted} accent="border-emerald-500" valueCls="text-emerald-600" />
-                <Kpi label="Filed / pending" value={stats.filed} accent="border-amber-500" valueCls="text-amber-600" />
-                <Kpi label="In audit / in progress" value={stats.audit} accent="border-slate-400" valueCls="text-slate-500" dashed />
+                <Kpi label="Assets in total" value={stats.total} accent="border-[#44546A]" valueCls="text-[#44546A]" />
+                <Kpi label="Granted / registered" value={stats.granted} accent="border-[#44546A]" valueCls="text-[#44546A]" />
+                <Kpi label="Filed / pending" value={stats.filed} accent="border-[#7F7F7F]" valueCls="text-[#5f5f5f]" />
+                <Kpi label="In audit / in progress" value={stats.audit} accent="border-[#7F7F7F]" valueCls="text-[#5f5f5f]" dashed />
               </div>
 
               <Section n="3" title="By type of protection" sub="how many, where and at what stage" />
@@ -334,7 +334,7 @@ export default function App({ session }) {
                       </div>
                       <div className="text-sm font-semibold text-slate-700 mt-1">{v.label}</div>
                       <div className="text-xs text-slate-500">{g.jur}</div>
-                      {g.urgent && <div className="mt-1 text-xs font-bold text-rose-600">deadline soon</div>}
+                      {g.urgent && <div className="mt-1 text-xs font-bold text-[#941100]">deadline soon</div>}
                     </div>
                   ); })}
               </div>
@@ -346,7 +346,7 @@ export default function App({ session }) {
                   return (
                     <button key={a.id} onClick={() => { setSection("assets"); setSelected(a); }} className="w-full flex items-center justify-between text-left px-4 py-3 hover:bg-slate-50">
                       <div className="flex items-center gap-4 min-w-0">
-                        <span className={`text-sm font-bold w-28 shrink-0 ${n < 0 ? "text-rose-600" : n <= 90 ? "text-amber-600" : "text-emerald-600"}`}>{a.key_deadline}</span>
+                        <span className={`text-sm font-bold w-28 shrink-0 ${n < 0 ? "text-[#941100]" : n <= 90 ? "text-[#941100]" : "text-[#44546A]"}`}>{a.key_deadline}</span>
                         <span className="text-sm text-slate-700 truncate">{a.title}</span>
                       </div>
                       <span className="text-xs text-slate-400 shrink-0 ml-3">{a.deadline_type || ""} · {n < 0 ? `${-n}d overdue` : `${n}d`}</span>
@@ -358,13 +358,13 @@ export default function App({ session }) {
               <div className="grid md:grid-cols-2 gap-4">
                 {owners.slice(0, 4).map(([o, c], i) => (
                   <div key={i} className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex items-center gap-3">
-                    <Building2 size={18} className="text-[#56689e]" />
+                    <Building2 size={18} className="text-[#44546A]" />
                     <div><div className="font-semibold text-slate-800">{o}</div><div className="text-xs text-slate-500">{c} asset(s)</div></div>
                   </div>
                 ))}
               </div>
-              <div className="mt-3 bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-slate-700 flex gap-2">
-                <AlertTriangle size={16} className="text-amber-600 mt-0.5 shrink-0" /><div>{OWNERSHIP_NOTE}</div>
+              <div className="mt-3 bg-[#941100]/5 border border-[#941100]/25 rounded-xl p-4 text-sm text-slate-700 flex gap-2">
+                <AlertTriangle size={16} className="text-[#941100] mt-0.5 shrink-0" /><div>{OWNERSHIP_NOTE}</div>
               </div>
             </>
           )}
@@ -403,9 +403,9 @@ export default function App({ session }) {
           {section === "consult" && (
             <div className="max-w-2xl">
               <p className="text-sm text-slate-500 mb-3">Describe a creation: the app classifies the route, flags the clocks and suggests the next step. General screening, not legal advice.</p>
-              <textarea value={cInput} onChange={(e) => setCInput(e.target.value)} rows={4} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#56689e]" placeholder="e.g. A dog collar with a sensor and a proprietary algorithm that detects dehydration. I showed it at a trade fair on 10 March." />
-              <button onClick={runConsulta} disabled={cLoading} className="mt-3 flex items-center gap-2 bg-[#56689e] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#475680] disabled:opacity-50"><Sparkles size={16} /> {cLoading ? "Analyzing…" : "Consult"}</button>
-              {cError && <div className="mt-4 bg-rose-50 border border-rose-200 rounded-lg p-3 text-sm text-slate-700 whitespace-pre-wrap">{cError}</div>}
+              <textarea value={cInput} onChange={(e) => setCInput(e.target.value)} rows={4} className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#44546A]" placeholder="e.g. A dog collar with a sensor and a proprietary algorithm that detects dehydration. I showed it at a trade fair on 10 March." />
+              <button onClick={runConsulta} disabled={cLoading} className="mt-3 flex items-center gap-2 bg-[#44546A] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#374454] disabled:opacity-50"><Sparkles size={16} /> {cLoading ? "Analyzing…" : "Consult"}</button>
+              {cError && <div className="mt-4 bg-[#941100]/5 border border-[#941100]/25 rounded-lg p-3 text-sm text-slate-700 whitespace-pre-wrap">{cError}</div>}
               {cResult && (
                 <div className="mt-5 space-y-4">
                   <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
@@ -413,7 +413,7 @@ export default function App({ session }) {
                     <div className="space-y-2">{(cResult.rutas || []).map((r, i) => { const v = VEHICLES[r.tipo] || VEHICLES.mixed; const Icon = v.icon;
                       return (<div key={i} className="flex items-start gap-2"><span className={`${v.chip} text-white rounded-md p-1 inline-flex shrink-0`}><Icon size={14} /></span><div className="text-sm"><span className="font-semibold text-slate-800">{v.label}</span><span className="text-slate-600"> — {r.motivo}</span></div></div>); })}</div>
                   </div>
-                  {cResult.relojes && <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-slate-700 flex gap-2"><AlertTriangle size={16} className="text-amber-600 mt-0.5 shrink-0" /><div><span className="font-semibold">Clocks / risks:</span> {cResult.relojes}</div></div>}
+                  {cResult.relojes && <div className="bg-[#941100]/5 border border-[#941100]/25 rounded-xl p-4 text-sm text-slate-700 flex gap-2"><AlertTriangle size={16} className="text-[#941100] mt-0.5 shrink-0" /><div><span className="font-semibold">Clocks / risks:</span> {cResult.relojes}</div></div>}
                   {cResult.siguiente_paso && <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 text-sm"><span className="font-semibold text-slate-800">Next step:</span> <span className="text-slate-700">{cResult.siguiente_paso}</span></div>}
                   {cResult.limite && <div className="text-xs text-slate-400">{cResult.limite}</div>}
                 </div>
