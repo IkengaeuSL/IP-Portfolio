@@ -40,9 +40,9 @@ const statusOf = (a) => {
 };
 
 const PRODUCTS = [
-  { name: "SSI Index", tag: "the foundation", border: "border-t-[#44546A]", text: "text-[#44546A]", desc: "Scores the health of every electrical substation. Open grid-resilience framework (Monte Carlo). Base work of the entire copyright family." },
-  { name: "SSI-ENN", tag: "the analytical engine", border: "border-t-[#7F7F7F]", text: "text-[#7F7F7F]", desc: "Neural network that values how worthwhile it is to install a BESS at each substation. Layer 1 documentation, code and audits." },
-  { name: "KINETIC SHIELD™", tag: "the commercial product", border: "border-t-[#941100]", text: "text-[#941100]", desc: "Sovereign edge 'neocloud' · pairs HPC with the power grid · leased to investors. The device is protected by the PCT application; its control/coordination by the G5 patent family." },
+  { name: "SSI Index", tag: "the foundation", border: "border-t-[#44546A]", text: "text-[#44546A]", tint: "bg-[#44546A]/5", desc: "Scores the health of every electrical substation. Open grid-resilience framework (Monte Carlo). Base work of the entire copyright family." },
+  { name: "SSI-ENN", tag: "the analytical engine", border: "border-t-[#7F7F7F]", text: "text-[#7F7F7F]", tint: "bg-[#7F7F7F]/8", desc: "Neural network that values how worthwhile it is to install a BESS at each substation. Layer 1 documentation, code and audits." },
+  { name: "KINETIC SHIELD™", tag: "the commercial product", border: "border-t-[#941100]", text: "text-[#941100]", tint: "bg-[#941100]/5", desc: "Sovereign edge 'neocloud' · pairs HPC with the power grid · leased to investors. The device is protected by the PCT application; its control/coordination by the G5 patent family." },
 ];
 const OWNERSHIP_NOTE = "Current structure: all IP is held by Altinium Invest SRL, except the 21 G5 provisional patents, which are held by Ikenga.eu SL. Planned: transfer the IP held by Altinium Invest SRL to Ikenga.eu SL.";
 
@@ -115,9 +115,9 @@ const DTYPES = ["", "us-grace-bar", "priority-12mo", "foreign-filing-30mo", "off
 const ROUTE_FILTERS = [["all", "All"], ["patent", "Patents"], ["copyright", "Copyright"], ["trademark", "Trademarks"], ["trade-secret", "Trade secrets"]];
 
 /* ---------- small components ---------- */
-function Kpi({ label, value, accent, valueCls, dashed }) {
+function Kpi({ label, value, accent, valueCls, dashed, tint }) {
   return (
-    <div className={`bg-white rounded-xl border ${dashed ? "border-dashed border-slate-300" : "border-slate-200"} border-t-4 ${accent} px-5 py-4 shadow-sm`}>
+    <div className={`${tint || "bg-white"} rounded-xl border ${dashed ? "border-dashed border-slate-300" : "border-slate-200"} border-t-4 ${accent} px-5 py-4 shadow-sm`}>
       <div className={`text-3xl font-bold ${valueCls}`}>{value}</div>
       <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 mt-1">{label}</div>
     </div>
@@ -281,14 +281,17 @@ export default function App({ session }) {
 
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-800" style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
-      <aside className="w-60 shrink-0 bg-gradient-to-b from-slate-900 to-[#374454] text-slate-300 flex flex-col">
-        <div className="px-5 py-5 border-b border-white/10"><div className="text-white font-bold text-lg leading-tight">IP&nbsp;Folio</div><div className="text-slate-400 text-xs">Altinium ecosystem · IP portfolio</div></div>
-        <nav className="px-3 py-4"><div className="px-2 text-xs uppercase tracking-wider text-slate-500 mb-2">Main</div>
+            <aside className="w-60 shrink-0 bg-white border-r border-slate-200 flex flex-col">
+        <div className="px-5 py-5 border-b border-slate-200 flex items-center gap-2">
+          <span className="bg-[#44546A] text-white rounded-md p-1.5 inline-flex"><ShieldCheck size={18} /></span>
+          <div><div className="text-slate-800 font-bold text-lg leading-tight">IP&nbsp;Folio</div><div className="text-slate-400 text-xs">Altinium ecosystem</div></div>
+        </div>
+        <nav className="px-3 py-4"><div className="px-2 text-xs uppercase tracking-wider text-slate-400 mb-2">Main</div>
           <div className="space-y-1">{NAV.map((item) => { const Icon = item.icon; const on = section === item.key;
             return (<button key={item.key} onClick={() => { setSection(item.key); setSelected(null); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${on ? "bg-[#44546A] text-white font-semibold" : "hover:bg-white/10"}`}><Icon size={17} /> {item.label}</button>); })}</div>
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm ${on ? "bg-[#44546A] text-white font-semibold" : "text-slate-600 hover:bg-slate-100"}`}><Icon size={17} /> {item.label}</button>); })}</div>
         </nav>
-        <div className="mt-auto px-5 py-4 text-xs text-slate-500 border-t border-white/10">Internal app · data in Supabase</div>
+        <div className="mt-auto px-5 py-4 text-xs text-slate-400 border-t border-slate-200">Internal app · data in Supabase</div>
       </aside>
 
       <main className="flex-1 min-w-0">
@@ -307,7 +310,7 @@ export default function App({ session }) {
               <Section n="1" title="The products" sub="how they stack" />
               <div className="grid md:grid-cols-3 gap-4">
                 {PRODUCTS.map((p, i) => (
-                  <div key={i} className={`bg-white rounded-xl border border-slate-200 border-t-4 ${p.border} shadow-sm p-5`}>
+                  <div key={i} className={`${p.tint} rounded-xl border border-slate-200 border-t-4 ${p.border} shadow-sm p-5`}>
                     <div className={`font-bold ${p.text}`}>{p.name}</div>
                     <div className="text-xs italic text-slate-500 mb-2">{p.tag}</div>
                     <div className="text-sm text-slate-600 leading-relaxed">{p.desc}</div>
@@ -317,10 +320,10 @@ export default function App({ session }) {
 
               <Section n="2" title="The portfolio in numbers" sub="overall status" />
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Kpi label="Assets in total" value={stats.total} accent="border-[#44546A]" valueCls="text-[#44546A]" />
-                <Kpi label="Granted / registered" value={stats.granted} accent="border-[#44546A]" valueCls="text-[#44546A]" />
-                <Kpi label="Filed / pending" value={stats.filed} accent="border-[#7F7F7F]" valueCls="text-[#5f5f5f]" />
-                <Kpi label="In audit / in progress" value={stats.audit} accent="border-[#7F7F7F]" valueCls="text-[#5f5f5f]" dashed />
+                <Kpi label="Assets in total" value={stats.total} accent="border-[#44546A]" valueCls="text-[#44546A]" tint="bg-[#44546A]/5" />
+                <Kpi label="Granted / registered" value={stats.granted} accent="border-[#44546A]" valueCls="text-[#44546A]" tint="bg-[#44546A]/5" />
+                <Kpi label="Filed / pending" value={stats.filed} accent="border-[#7F7F7F]" valueCls="text-[#5f5f5f]" tint="bg-[#7F7F7F]/8" />
+                <Kpi label="In audit / in progress" value={stats.audit} accent="border-[#7F7F7F]" valueCls="text-[#5f5f5f]" dashed tint="bg-[#7F7F7F]/5" />
               </div>
 
               <Section n="3" title="By type of protection" sub="how many, where and at what stage" />
@@ -428,3 +431,4 @@ export default function App({ session }) {
     </div>
   );
 }
+
