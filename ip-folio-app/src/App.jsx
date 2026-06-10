@@ -127,7 +127,7 @@ function Kpi({ label, value, accent, valueCls, dashed, tint }) {
 }
 function Chips({ value, onChange }) {
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className="flex flex-wrap gap-2">
       {ROUTE_FILTERS.map(([k, l]) => (
         <button key={k} onClick={() => onChange(k)}
           className={`text-xs font-semibold px-3 py-1 rounded-full border ${value === k ? "bg-[#44546A] text-white border-[#44546A]" : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"}`}>{l}</button>
@@ -276,11 +276,11 @@ function NewReportModal({ onClose, onAdd }) {
   );
 }
 
-function CountryChip({ c, onMove }) {
+function CountryChip({ c, onMove, onOpen }) {
   const reg = c.status === "registered";
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border ${reg ? "bg-[#44546A]/10 border-[#44546A]/30 text-[#44546A]" : "bg-[#7F7F7F]/12 border-[#7F7F7F]/40 text-[#5f5f5f]"}`}>
-      {c.name}
+      {reg ? <button onClick={() => onOpen(c.name)} className="hover:underline" title="See registration records">{c.name}</button> : <span>{c.name}</span>}
       <button onClick={() => onMove(c)} title={reg ? "Move to: to register" : "Mark as registered"} className="opacity-40 hover:opacity-100">{reg ? <ArrowRight size={12} /> : <ArrowLeft size={12} />}</button>
     </span>
   );
@@ -314,6 +314,8 @@ export default function App({ session }) {
   const [showNewDoc, setShowNewDoc] = useState(false);
   const [countries, setCountries] = useState([]);
   const [showNewCountry, setShowNewCountry] = useState(false);
+  const [query, setQuery] = useState("");
+  const openCountry = (name) => { setRouteFilter("all"); setQuery(name); setSelected(null); setSection("assets"); };
   const [section, setSection] = useState("overview");
   const [selected, setSelected] = useState(null);
   const [showNew, setShowNew] = useState(false);
@@ -375,7 +377,11 @@ export default function App({ session }) {
   }, [assets]);
   const owners = useMemo(() => { const m = {}; assets.forEach((a) => { const o = a.owner || "—"; m[o] = (m[o] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); }, [assets]);
   const deadlines = useMemo(() => assets.filter((a) => a.key_deadline).sort((a, b) => daysTo(a.key_deadline) - daysTo(b.key_deadline)), [assets]);
-  const list = useMemo(() => routeFilter === "all" ? assets : assets.filter((a) => a.type === routeFilter), [assets, routeFilter]);
+  const list = useMemo(() => {
+    let r = routeFilter === "all" ? assets : assets.filter((a) => a.type === routeFilter);
+    if (query.trim()) { const q = query.trim().toLowerCase(); r = r.filter((a) => `${a.title} ${a.jurisdiction || ""} ${a.owner || ""}`.toLowerCase().includes(q)); }
+    return r;
+  }, [assets, routeFilter, query]);
 
   const Section = ({ n, title, sub }) => (
     <div className="flex items-center gap-3 mt-8 mb-3">
@@ -503,10 +509,14 @@ export default function App({ session }) {
 
           {section === "assets" && (
             <>
-              <Chips value={routeFilter} onChange={setRouteFilter} />
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <Chips value={routeFilter} onChange={setRouteFilter} />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search title, country, owner…" className="ml-auto w-64 max-w-full border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-[#44546A]" />
+              </div>
+              {query && <div className="text-xs text-slate-500 mb-3">{list.length} result(s) for “{query}” · <button onClick={() => setQuery("")} className="text-[#44546A] font-semibold hover:underline">clear</button></div>}
               {list.length ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">{list.map((a) => <AssetCard key={a.id} a={a} onClick={() => setSelected(a)} />)}</div>
-              ) : <div className="text-sm text-slate-400 italic py-10 text-center">No assets in this view.</div>}
+              ) : <div className="text-sm text-slate-400 italic py-10 text-center">No assets match.</div>}
             </>
           )}
 
@@ -519,11 +529,11 @@ export default function App({ session }) {
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-[#44546A] p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-3"><h3 className="font-bold text-slate-800">Registered</h3><span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#44546A]/12 text-[#44546A]">{countries.filter((c) => c.status === "registered").length}</span></div>
-                  <div className="flex flex-wrap gap-2">{countries.filter((c) => c.status === "registered").sort((a, b) => a.name.localeCompare(b.name)).map((c) => <CountryChip key={c.id} c={c} onMove={toggleCountry} />)}</div>
+                  <div className="flex flex-wrap gap-2">{countries.filter((c) => c.status === "registered").sort((a, b) => a.name.localeCompare(b.name)).map((c) => <CountryChip key={c.id} c={c} onMove={toggleCountry} onOpen={openCountry} />)}</div>
                 </div>
                 <div className="bg-white rounded-xl border border-slate-200 border-t-4 border-[#7F7F7F] p-5 shadow-sm">
                   <div className="flex items-center justify-between mb-3"><h3 className="font-bold text-slate-800">To register</h3><span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#7F7F7F]/15 text-[#5f5f5f]">{countries.filter((c) => c.status !== "registered").length}</span></div>
-                  <div className="flex flex-wrap gap-2">{countries.filter((c) => c.status !== "registered").sort((a, b) => a.name.localeCompare(b.name)).map((c) => <CountryChip key={c.id} c={c} onMove={toggleCountry} />)}</div>
+                  <div className="flex flex-wrap gap-2">{countries.filter((c) => c.status !== "registered").sort((a, b) => a.name.localeCompare(b.name)).map((c) => <CountryChip key={c.id} c={c} onMove={toggleCountry} onOpen={openCountry} />)}</div>
                   {countries.filter((c) => c.status !== "registered").length === 0 && <p className="text-xs text-slate-400 italic">None yet — add the countries you plan to register.</p>}
                 </div>
               </div>
