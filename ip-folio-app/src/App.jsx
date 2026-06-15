@@ -119,66 +119,66 @@ const ROUTE_FILTERS = [["all", "All"], ["patent", "Patents"], ["copyright", "Cop
 
 /* ---------- filing checklists (verified against official sources) ---------- */
 const CHECKLIST_TEMPLATES = [
-  { key: "uspto", title: "USPTO provisional patent", sub: "35 U.S.C. \u00a7111(b)", src: "uspto.gov",
+  { key: "uspto", title: "USPTO provisional patent", sub: "35 U.S.C. §111(b)", src: "uspto.gov", url: "https://www.uspto.gov/patents/basics/apply/provisional-application",
     items: [
-      { key: "spec", label: "Specification (written description, \u00a7112(a))" },
-      { key: "sb16", label: "Cover sheet PTO/SB/16" },
-      { key: "drawings", label: "Drawings (if needed to understand)" },
-      { key: "listing", label: "Computer program listing (.txt)", tag: "if software" },
-      { key: "ads", label: "Application Data Sheet (SB14)", tag: "optional" },
-      { key: "fee", label: "Fee \u2014 current small-entity (37 CFR 1.16(d))", tag: "check fee" },
+      { key: "spec", label: "Specification (written description, §112(a))", internal: true },
+      { key: "sb16", label: "Cover sheet PTO/SB/16", link: "https://www.uspto.gov/sites/default/files/documents/sb0016.pdf" },
+      { key: "drawings", label: "Drawings (if needed to understand)", internal: true },
+      { key: "listing", label: "Computer program listing (.txt)", tag: "if software", internal: true },
+      { key: "ads", label: "Application Data Sheet (SB14)", tag: "optional", link: "https://www.uspto.gov/patent/forms/important-information-completing-application-data-sheet-ads" },
+      { key: "fee", label: "Fee — current small-entity (37 CFR 1.16(d))", tag: "check fee" },
     ], note: "Not required: claims, oath/declaration, IDS." },
-  { key: "usco", title: "USCO copyright (eCO)", sub: "U.S. Copyright Office", src: "copyright.gov",
+  { key: "usco", title: "USCO copyright (eCO)", sub: "U.S. Copyright Office", src: "copyright.gov", url: "https://www.copyright.gov/registration/",
     items: [
-      { key: "eco", label: "eCO account" },
-      { key: "app", label: "Application: Standard (1 work) or Group of unpublished (\u226410)" },
+      { key: "eco", label: "eCO account", link: "https://eco.copyright.gov" },
+      { key: "app", label: "Application: Standard (1 work) or Group of unpublished (≤10)" },
       { key: "info", label: "Title, author(s), claimant, year, publication status" },
-      { key: "deposit", label: "Deposit (software \u2192 Circular 61)", tag: "confirm rule" },
-      { key: "fee", label: "Fee \u2014 $45 single / $65 standard / $85 group" },
-      { key: "submit", label: "Submit \u00b7 save case number" },
+      { key: "deposit", label: "Deposit (software → Circular 61)", tag: "confirm rule", internal: true },
+      { key: "fee", label: "Fee — $45 single / $65 standard / $85 group" },
+      { key: "submit", label: "Submit · save case number", link: "https://eco.copyright.gov" },
     ] },
-  { key: "euipo", title: "EUIPO trademark", sub: "EU trade mark \u00b7 Art. 31 EUTMR", src: "euipo.europa.eu",
+  { key: "euipo", title: "EUIPO trademark", sub: "EU trade mark · Art. 31 EUTMR", src: "euipo.europa.eu", url: "https://www.euipo.europa.eu/en/trade-marks/how-to-apply/apply-now",
     items: [
       { key: "sign", label: "Representation of the mark" },
       { key: "owner", label: "Owner / applicant details" },
       { key: "classes", label: "Goods & services (Nice classes)" },
-      { key: "form", label: "Form: EUTM Easy Filing or Filing" },
-      { key: "fee", label: "Fee \u2014 \u20ac850 (1 class) \u00b7 +\u20ac50 2nd \u00b7 +\u20ac150 from 3rd" },
-      { key: "file", label: "File \u00b7 save filing number" },
+      { key: "form", label: "Form: EUTM Easy Filing or Filing", link: "https://www.euipo.europa.eu/en/trade-marks/how-to-apply/apply-now" },
+      { key: "fee", label: "Fee — €850 (1 class) · +€50 2nd · +€150 from 3rd" },
+      { key: "file", label: "File · save filing number" },
     ] },
-  { key: "oepm", title: "OEPM utility model", sub: "Modelo de utilidad \u00b7 Ley 24/2015", src: "oepm.es",
+  { key: "oepm", title: "OEPM utility model", sub: "Modelo de utilidad · Ley 24/2015", src: "oepm.es", url: "https://www.oepm.es/es/invenciones/Presentar-una-solicitud/solicitar-un-modelo-de-utilidad/proceso-de-solicitud/",
     items: [
-      { key: "instancia", label: "Instancia de solicitud (form)" },
-      { key: "descripcion", label: "Descripci\u00f3n" },
-      { key: "reivindicaciones", label: "Reivindicaciones", tag: "office action" },
-      { key: "dibujos", label: "Dibujos (si procede)" },
-      { key: "resumen", label: "Resumen" },
-      { key: "tasa", label: "Tasa de dep\u00f3sito" },
+      { key: "instancia", label: "Instancia de solicitud (form)", link: "https://www.oepm.es/es/herramientas/Formularios/formularios-de-invenciones/" },
+      { key: "descripcion", label: "Descripción", internal: true },
+      { key: "reivindicaciones", label: "Reivindicaciones", tag: "office action", internal: true },
+      { key: "dibujos", label: "Dibujos (si procede)", internal: true },
+      { key: "resumen", label: "Resumen", internal: true },
+      { key: "tasa", label: "Tasa de depósito" },
     ], note: "Examen de oficio: 2 meses para subsanar defectos." },
-  { key: "madrid", title: "Madrid System extension", sub: "International trademark", src: "wipo.int",
+  { key: "madrid", title: "Madrid System extension", sub: "International trademark", src: "wipo.int", url: "https://www.wipo.int/en/web/madrid-system/how_to/file/index",
     items: [
       { key: "basic", label: "Basic mark in place (e.g. EUIPO)" },
       { key: "origin", label: "File through the Office of origin" },
-      { key: "mm2", label: "Form MM2 \u00b7 designate members" },
+      { key: "mm2", label: "Form MM2 · designate members", link: "https://www.wipo.int/documents/d/madrid-system/docs-en-form_mm2-editable1.pdf" },
       { key: "gs", label: "Goods/services within basic-mark scope" },
-      { key: "fees", label: "Fees \u2014 653/903 CHF \u00b7 +100/member \u00b7 +100/class >3" },
+      { key: "fees", label: "Fees — 653/903 CHF · +100/member · +100/class >3" },
     ] },
-  { key: "pct", title: "PCT (international patent)", sub: "Art. 3 PCT", src: "wipo.int",
+  { key: "pct", title: "PCT (international patent)", sub: "Art. 3 PCT", src: "wipo.int", url: "https://www.wipo.int/en/web/pct-system/filing",
     items: [
-      { key: "request", label: "Request (Form PCT/RO/101)" },
-      { key: "body", label: "Description, claims, abstract" },
-      { key: "drawings", label: "Drawings (if needed)" },
+      { key: "request", label: "Request (Form PCT/RO/101)", link: "https://www.wipo.int/documents/d/pct-system/docs-en-forms-request-ed-request.pdf" },
+      { key: "body", label: "Description, claims, abstract", internal: true },
+      { key: "drawings", label: "Drawings (if needed)", internal: true },
       { key: "file", label: "File with Receiving Office (or ePCT)" },
-      { key: "fees", label: "Fees \u2014 transmittal + search + int'l filing", tag: "check amounts" },
+      { key: "fees", label: "Fees — transmittal + search + int'l filing", tag: "check amounts" },
     ] },
-  { key: "siae", title: "SIAE deposit (Italy)", sub: "Deposito Opere Inedite \u00b7 Mod. 350", src: "siae.it",
+  { key: "siae", title: "SIAE deposit (Italy)", sub: "Deposito Opere Inedite · Mod. 350", src: "siae.it", url: "https://www.siae.it/it/cosa-facciamo/altri-servizi/deposito-opere-inedite/",
     items: [
-      { key: "mod350", label: "Modello di dichiarazione (Mod. 350), signed" },
+      { key: "mod350", label: "Modello di dichiarazione (Mod. 350), signed", link: "https://d2aod8qfhzlk6j.cloudfront.net/SITOIS/mod_350_f8e1418bd0.pdf" },
       { key: "id", label: "Depositor ID (or legal rep)" },
-      { key: "work", label: "Copy of the work (signed on every page / on the medium)" },
+      { key: "work", label: "Copy of the work (signed on every page / on the medium)", internal: true },
       { key: "pay", label: "Proof of payment" },
-      { key: "fee", label: "Fee \u2014 \u20ac72 member \u00b7 \u20ac144 non-member \u00b7 \u20ac288 legal entity" },
-    ], note: "Software accepted \u00b7 valid 5 yrs, renewable \u00b7 mail to SIAE, Roma." },
+      { key: "fee", label: "Fee — €72 member · €144 non-member · €288 legal entity" },
+    ], note: "Software accepted · valid 5 yrs, renewable · mail to SIAE, Roma." },
 ];
 const TEMPLATE_BY_KEY = Object.fromEntries(CHECKLIST_TEMPLATES.map((t) => [t.key, t]));
 function templateForAsset(a) {
@@ -282,14 +282,20 @@ function Detail({ a, docs, checks, onToggleCheck, onClose }) {
                 <div className="px-3 py-2">
                   {tpl.items.map((it) => { const done = !!(checks && checks[a.id + "::" + it.key]);
                     return (
-                      <button key={it.key} onClick={() => onToggleCheck(a.id, it.key)} className="w-full flex items-center gap-2.5 py-1.5 text-left">
-                        <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${done ? "bg-[#44546A] border-[#44546A] text-white" : "border-slate-300 bg-white"}`}>{done && <Check size={11} />}</span>
-                        <span className={`text-sm ${done ? "text-slate-400 line-through" : "text-slate-700"}`}>{it.label}</span>
-                        {it.tag && <span className="ml-auto text-[10px] text-[#941100] border border-[#941100]/30 bg-[#941100]/5 rounded px-1.5 shrink-0">{it.tag}</span>}
-                      </button>
+                      <div key={it.key} className="flex items-center gap-2.5 py-1.5">
+                        <button onClick={() => onToggleCheck(a.id, it.key)} className="flex items-center gap-2.5 flex-1 min-w-0 text-left">
+                          <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${done ? "bg-[#44546A] border-[#44546A] text-white" : "border-slate-300 bg-white"}`}>{done && <Check size={11} />}</span>
+                          <span className={`text-sm ${done ? "text-slate-400 line-through" : "text-slate-700"}`}>{it.label}</span>
+                        </button>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {it.internal && <span className="text-[10px] text-slate-500 border border-slate-300 bg-slate-50 rounded px-1.5">Internal</span>}
+                          {it.tag && <span className="text-[10px] text-[#941100] border border-[#941100]/30 bg-[#941100]/5 rounded px-1.5">{it.tag}</span>}
+                          {it.link && <a href={it.link} target="_blank" rel="noopener noreferrer" title="Official form / portal" className="text-[#44546A] hover:text-[#374454]"><ExternalLink size={13} /></a>}
+                        </div>
+                      </div>
                     ); })}
                   {tpl.note && <div className="text-[11px] text-slate-400 italic mt-1.5">{tpl.note}</div>}
-                  <div className="text-[11px] text-slate-400 mt-1.5">Template: {tpl.title} \u00b7 verified \u00b7 {tpl.src}</div>
+                  <a href={tpl.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-[#44546A] hover:underline mt-2"><ExternalLink size={11} /> Official source · {tpl.src}</a>
                 </div>
               )}
             </div>
@@ -675,19 +681,28 @@ export default function App({ session }) {
 
           {section === "checklist" && (
             <div className="space-y-4">
-              <p className="text-sm text-slate-500">Documentation required for each type of filing. Reference guide \u2014 to track progress, open an asset in Assets and use its filing checklist.</p>
+              <p className="text-sm text-slate-500">Documentation required for each type of filing. Reference guide — to track progress, open an asset in Assets and use its filing checklist. Items tagged Internal are drafted by our technical team.</p>
               <div className="grid sm:grid-cols-2 gap-4">
                 {CHECKLIST_TEMPLATES.map((t) => (
                   <div key={t.key} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-                    <div className="font-semibold text-slate-800">{t.title}</div>
-                    <div className="text-xs text-slate-400">{t.sub}</div>
-                    <div className="inline-flex items-center gap-1 text-[11px] mt-2 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700"><Check size={11} /> Verified \u00b7 {t.src}</div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-semibold text-slate-800">{t.title}</div>
+                        <div className="text-xs text-slate-400">{t.sub}</div>
+                      </div>
+                      <a href={t.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[11px] text-[#44546A] hover:underline shrink-0 whitespace-nowrap"><ExternalLink size={11} /> Source</a>
+                    </div>
+                    <div className="inline-flex items-center gap-1 text-[11px] mt-2 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700"><Check size={11} /> Verified · {t.src}</div>
                     <div className="mt-3 space-y-1.5">
                       {t.items.map((it) => (
-                        <div key={it.key} className="flex items-start gap-2 text-sm text-slate-700">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#44546A] mt-1.5 shrink-0" />
-                          <span>{it.label}</span>
-                          {it.tag && <span className="ml-auto text-[10px] text-[#941100] border border-[#941100]/30 bg-[#941100]/5 rounded px-1.5 shrink-0">{it.tag}</span>}
+                        <div key={it.key} className="flex items-center gap-2 text-sm text-slate-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#44546A] shrink-0" />
+                          <span className="flex-1">{it.label}</span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {it.internal && <span className="text-[10px] text-slate-500 border border-slate-300 bg-slate-50 rounded px-1.5">Internal</span>}
+                            {it.tag && <span className="text-[10px] text-[#941100] border border-[#941100]/30 bg-[#941100]/5 rounded px-1.5">{it.tag}</span>}
+                            {it.link && <a href={it.link} target="_blank" rel="noopener noreferrer" title="Official form / portal" className="text-[#44546A] hover:text-[#374454]"><ExternalLink size={13} /></a>}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -695,7 +710,7 @@ export default function App({ session }) {
                   </div>
                 ))}
               </div>
-              <div className="text-xs text-slate-400">Sources are the official offices (uspto.gov, copyright.gov, euipo.europa.eu, oepm.es, wipo.int, siae.it). General information, not legal advice.</div>
+              <div className="text-xs text-slate-400">Links open the official offices (uspto.gov, copyright.gov, euipo.europa.eu, oepm.es, wipo.int, siae.it). General information, not legal advice.</div>
             </div>
           )}
 
