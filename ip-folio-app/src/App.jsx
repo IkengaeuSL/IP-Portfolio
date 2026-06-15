@@ -153,9 +153,10 @@ function AssetCard({ a, onClick }) {
     </button>
   );
 }
-function Detail({ a, onClose }) {
+function Detail({ a, docs, onClose }) {
   if (!a) return null;
   const v = VEHICLES[a.type] || VEHICLES.mixed; const Icon = v.icon; const s = statusOf(a); const n = daysTo(a.key_deadline);
+  const relDocs = (docs || []).filter((d) => d.related_asset && d.related_asset.includes(a.id) && d.url);
   const Row = ({ icon: I, k, val }) => (
     <div className="flex items-start gap-3 py-2 border-b border-slate-100"><I size={15} className="text-slate-400 mt-0.5 shrink-0" />
       <div className="text-xs text-slate-500 w-40 shrink-0">{k}</div><div className="text-sm text-slate-800 font-medium break-words">{val || "—"}</div></div>
@@ -182,6 +183,14 @@ function Detail({ a, onClose }) {
             <Row icon={Clock} k="Next deadline" val={a.key_deadline ? `${a.key_deadline} · ${a.deadline_type || "—"}${n !== null ? ` (${n < 0 ? "expired" : n + " d"})` : ""}` : "no deadline"} />
           </div>
           {a.notes ? <div className="mt-5 bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm text-slate-700">{a.notes}</div> : null}
+          {relDocs.length > 0 && (
+            <div className="mt-5">
+              <div className="text-xs font-semibold text-slate-500 mb-2">Documents</div>
+              {relDocs.map((d) => (
+                <a key={d.id} href={d.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold text-[#44546A] hover:underline py-1"><ExternalLink size={14} /> {d.title}</a>
+              ))}
+            </div>
+          )}
           <div className="mt-5 text-xs text-slate-400">General information, not legal advice.</div>
         </div>
       </div>
@@ -377,6 +386,7 @@ export default function App({ session }) {
   }, [assets]);
   const owners = useMemo(() => { const m = {}; assets.forEach((a) => { const o = a.owner || "—"; m[o] = (m[o] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); }, [assets]);
   const deadlines = useMemo(() => assets.filter((a) => a.key_deadline).sort((a, b) => daysTo(a.key_deadline) - daysTo(b.key_deadline)), [assets]);
+  const reportDocs = useMemo(() => docs.filter((d) => !assets.some((a) => d.related_asset && d.related_asset.includes(a.id))), [docs, assets]);
   const list = useMemo(() => {
     let r = routeFilter === "all" ? assets : assets.filter((a) => a.type === routeFilter);
     if (query.trim()) { const q = query.trim().toLowerCase(); r = r.filter((a) => `${a.title} ${a.jurisdiction || ""} ${a.owner || ""}`.toLowerCase().includes(q)); }
@@ -545,8 +555,8 @@ export default function App({ session }) {
               <div className="flex justify-end mb-4">
                 <button onClick={() => setShowNewDoc(true)} className="flex items-center gap-2 bg-[#44546A] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#374454]"><Plus size={16} /> New report</button>
               </div>
-              {docs.length
-                ? <div className="grid sm:grid-cols-2 gap-4">{docs.map((d) => <DocCard key={d.id} d={d} />)}</div>
+              {reportDocs.length
+                ? <div className="grid sm:grid-cols-2 gap-4">{reportDocs.map((d) => <DocCard key={d.id} d={d} />)}</div>
                 : <div className="text-sm text-slate-400 italic py-10 text-center">No reports yet. Use “New report” to add your first document.</div>}
             </>
           )}
@@ -574,7 +584,7 @@ export default function App({ session }) {
         </div>
       </main>
 
-      {selected && <Detail a={selected} onClose={() => setSelected(null)} />}
+      {selected && <Detail a={selected} docs={docs} onClose={() => setSelected(null)} />}
       {showNew && <NewAssetModal onClose={() => setShowNew(false)} onAdd={addAsset} />}
       {showNewDoc && <NewReportModal onClose={() => setShowNewDoc(false)} onAdd={addDoc} />}
       {showNewCountry && <NewCountryModal onClose={() => setShowNewCountry(false)} onAdd={addCountry} />}
