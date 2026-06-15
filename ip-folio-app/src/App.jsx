@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   LayoutGrid, ShieldCheck, FileText, Stamp, Lightbulb, Clock, Layers,
   Plus, X, User, Building2, Calendar, Hash, MapPin, Scale, Sparkles,
-  AlertTriangle, LogOut, ArrowRight, BookOpen, Newspaper, ExternalLink, Globe, ArrowLeft
+  AlertTriangle, LogOut, ArrowRight, BookOpen, Newspaper, ExternalLink, Globe, ArrowLeft, ListChecks, ChevronDown, Check
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
@@ -62,7 +62,7 @@ const FAMILIES = [
     ],
     note: "Further marks in progress (GROW PROTECT SUSTAIN IN THE 4IR, Terranode) and the Land Tool app name — to be confirmed." },
   { type: "patent", title: "Utility model · 1", flag: "URGENT",
-    meta: "OEPM · U202531782 · rep. Marina Gómez Calvo (Arochi & Lindner)",
+    meta: "OEPM · U202531782 · rep. Arochi & Lindner",
     items: [
       "Distributed multifunctional device (electrical + data services)",
       "2nd official action (3 Jun) · BOPI 09/06/2026 · response deadline ~09/08/2026 (extendable by 2 months)",
@@ -110,11 +110,87 @@ const NAV = [
   { key: "assets", label: "Assets", icon: Layers },
   { key: "countries", label: "Countries", icon: Globe },
   { key: "reports", label: "Reports", icon: Newspaper },
+  { key: "checklist", label: "Checklist", icon: ListChecks },
   { key: "consult", label: "AI Consultation", icon: Sparkles },
 ];
-const TITLES = { overview: "The ecosystem · IP portfolio", portfolio: "Portfolio · detail by family", assets: "Assets · full register", countries: "Countries · SSI Index coverage", reports: "Reports · supporting documents", consult: "AI Consultation — Mode A" };
+const TITLES = { overview: "The ecosystem · IP portfolio", portfolio: "Portfolio · detail by family", assets: "Assets · full register", countries: "Countries · SSI Index coverage", reports: "Reports · supporting documents", checklist: "Checklist · filing documentation", consult: "AI Consultation — Mode A" };
 const DTYPES = ["", "us-grace-bar", "priority-12mo", "foreign-filing-30mo", "office-action-response", "copyright-timely-reg", "maintenance", "renewal", "other"];
 const ROUTE_FILTERS = [["all", "All"], ["patent", "Patents"], ["copyright", "Copyright"], ["trademark", "Trademarks"], ["trade-secret", "Trade secrets"]];
+
+/* ---------- filing checklists (verified against official sources) ---------- */
+const CHECKLIST_TEMPLATES = [
+  { key: "uspto", title: "USPTO provisional patent", sub: "35 U.S.C. \u00a7111(b)", src: "uspto.gov",
+    items: [
+      { key: "spec", label: "Specification (written description, \u00a7112(a))" },
+      { key: "sb16", label: "Cover sheet PTO/SB/16" },
+      { key: "drawings", label: "Drawings (if needed to understand)" },
+      { key: "listing", label: "Computer program listing (.txt)", tag: "if software" },
+      { key: "ads", label: "Application Data Sheet (SB14)", tag: "optional" },
+      { key: "fee", label: "Fee \u2014 current small-entity (37 CFR 1.16(d))", tag: "check fee" },
+    ], note: "Not required: claims, oath/declaration, IDS." },
+  { key: "usco", title: "USCO copyright (eCO)", sub: "U.S. Copyright Office", src: "copyright.gov",
+    items: [
+      { key: "eco", label: "eCO account" },
+      { key: "app", label: "Application: Standard (1 work) or Group of unpublished (\u226410)" },
+      { key: "info", label: "Title, author(s), claimant, year, publication status" },
+      { key: "deposit", label: "Deposit (software \u2192 Circular 61)", tag: "confirm rule" },
+      { key: "fee", label: "Fee \u2014 $45 single / $65 standard / $85 group" },
+      { key: "submit", label: "Submit \u00b7 save case number" },
+    ] },
+  { key: "euipo", title: "EUIPO trademark", sub: "EU trade mark \u00b7 Art. 31 EUTMR", src: "euipo.europa.eu",
+    items: [
+      { key: "sign", label: "Representation of the mark" },
+      { key: "owner", label: "Owner / applicant details" },
+      { key: "classes", label: "Goods & services (Nice classes)" },
+      { key: "form", label: "Form: EUTM Easy Filing or Filing" },
+      { key: "fee", label: "Fee \u2014 \u20ac850 (1 class) \u00b7 +\u20ac50 2nd \u00b7 +\u20ac150 from 3rd" },
+      { key: "file", label: "File \u00b7 save filing number" },
+    ] },
+  { key: "oepm", title: "OEPM utility model", sub: "Modelo de utilidad \u00b7 Ley 24/2015", src: "oepm.es",
+    items: [
+      { key: "instancia", label: "Instancia de solicitud (form)" },
+      { key: "descripcion", label: "Descripci\u00f3n" },
+      { key: "reivindicaciones", label: "Reivindicaciones", tag: "office action" },
+      { key: "dibujos", label: "Dibujos (si procede)" },
+      { key: "resumen", label: "Resumen" },
+      { key: "tasa", label: "Tasa de dep\u00f3sito" },
+    ], note: "Examen de oficio: 2 meses para subsanar defectos." },
+  { key: "madrid", title: "Madrid System extension", sub: "International trademark", src: "wipo.int",
+    items: [
+      { key: "basic", label: "Basic mark in place (e.g. EUIPO)" },
+      { key: "origin", label: "File through the Office of origin" },
+      { key: "mm2", label: "Form MM2 \u00b7 designate members" },
+      { key: "gs", label: "Goods/services within basic-mark scope" },
+      { key: "fees", label: "Fees \u2014 653/903 CHF \u00b7 +100/member \u00b7 +100/class >3" },
+    ] },
+  { key: "pct", title: "PCT (international patent)", sub: "Art. 3 PCT", src: "wipo.int",
+    items: [
+      { key: "request", label: "Request (Form PCT/RO/101)" },
+      { key: "body", label: "Description, claims, abstract" },
+      { key: "drawings", label: "Drawings (if needed)" },
+      { key: "file", label: "File with Receiving Office (or ePCT)" },
+      { key: "fees", label: "Fees \u2014 transmittal + search + int'l filing", tag: "check amounts" },
+    ] },
+  { key: "siae", title: "SIAE deposit (Italy)", sub: "Deposito Opere Inedite \u00b7 Mod. 350", src: "siae.it",
+    items: [
+      { key: "mod350", label: "Modello di dichiarazione (Mod. 350), signed" },
+      { key: "id", label: "Depositor ID (or legal rep)" },
+      { key: "work", label: "Copy of the work (signed on every page / on the medium)" },
+      { key: "pay", label: "Proof of payment" },
+      { key: "fee", label: "Fee \u2014 \u20ac72 member \u00b7 \u20ac144 non-member \u00b7 \u20ac288 legal entity" },
+    ], note: "Software accepted \u00b7 valid 5 yrs, renewable \u00b7 mail to SIAE, Roma." },
+];
+const TEMPLATE_BY_KEY = Object.fromEntries(CHECKLIST_TEMPLATES.map((t) => [t.key, t]));
+function templateForAsset(a) {
+  const off = (a.jurisdiction || "").toUpperCase();
+  if (off.includes("USCO")) return "usco";
+  if (off.includes("USPTO")) return "uspto";
+  if (off.includes("EUIPO")) return "euipo";
+  if (off.includes("OEPM")) return "oepm";
+  if (off.includes("SIAE")) return "siae";
+  if (off.includes("WIPO")) return a.type === "trademark" ? "madrid" : "pct";
+  return null;
+}
 
 /* ---------- small components ---------- */
 function Kpi({ label, value, accent, valueCls, dashed, tint }) {
@@ -153,10 +229,13 @@ function AssetCard({ a, onClick }) {
     </button>
   );
 }
-function Detail({ a, docs, onClose }) {
+function Detail({ a, docs, checks, onToggleCheck, onClose }) {
+  const [clOpen, setClOpen] = useState(true);
   if (!a) return null;
   const v = VEHICLES[a.type] || VEHICLES.mixed; const Icon = v.icon; const s = statusOf(a); const n = daysTo(a.key_deadline);
   const relDocs = (docs || []).filter((d) => d.related_asset && d.related_asset.includes(a.id) && d.url);
+  const tpl = TEMPLATE_BY_KEY[templateForAsset(a)] || null;
+  const clDone = tpl ? tpl.items.filter((it) => checks && checks[a.id + "::" + it.key]).length : 0;
   const Row = ({ icon: I, k, val }) => (
     <div className="flex items-start gap-3 py-2 border-b border-slate-100"><I size={15} className="text-slate-400 mt-0.5 shrink-0" />
       <div className="text-xs text-slate-500 w-40 shrink-0">{k}</div><div className="text-sm text-slate-800 font-medium break-words">{val || "—"}</div></div>
@@ -189,6 +268,30 @@ function Detail({ a, docs, onClose }) {
               {relDocs.map((d) => (
                 <a key={d.id} href={d.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-semibold text-[#44546A] hover:underline py-1"><ExternalLink size={14} /> {d.title}</a>
               ))}
+            </div>
+          )}
+          {tpl && (
+            <div className="mt-5 border border-slate-200 rounded-lg overflow-hidden">
+              <button onClick={() => setClOpen((o) => !o)} className="w-full flex items-center gap-2 px-3 py-2.5 bg-slate-50 hover:bg-slate-100">
+                <ListChecks size={16} className="text-[#44546A] shrink-0" />
+                <span className="text-sm font-semibold text-slate-700">Filing checklist</span>
+                <span className="ml-auto text-xs text-slate-500">{clDone} / {tpl.items.length}</span>
+                <ChevronDown size={16} className={`text-slate-400 transition-transform ${clOpen ? "rotate-180" : ""}`} />
+              </button>
+              {clOpen && (
+                <div className="px-3 py-2">
+                  {tpl.items.map((it) => { const done = !!(checks && checks[a.id + "::" + it.key]);
+                    return (
+                      <button key={it.key} onClick={() => onToggleCheck(a.id, it.key)} className="w-full flex items-center gap-2.5 py-1.5 text-left">
+                        <span className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${done ? "bg-[#44546A] border-[#44546A] text-white" : "border-slate-300 bg-white"}`}>{done && <Check size={11} />}</span>
+                        <span className={`text-sm ${done ? "text-slate-400 line-through" : "text-slate-700"}`}>{it.label}</span>
+                        {it.tag && <span className="ml-auto text-[10px] text-[#941100] border border-[#941100]/30 bg-[#941100]/5 rounded px-1.5 shrink-0">{it.tag}</span>}
+                      </button>
+                    ); })}
+                  {tpl.note && <div className="text-[11px] text-slate-400 italic mt-1.5">{tpl.note}</div>}
+                  <div className="text-[11px] text-slate-400 mt-1.5">Template: {tpl.title} \u00b7 verified \u00b7 {tpl.src}</div>
+                </div>
+              )}
             </div>
           )}
           <div className="mt-5 text-xs text-slate-400">General information, not legal advice.</div>
@@ -338,6 +441,15 @@ export default function App({ session }) {
   useEffect(() => { loadDocs(); }, []);
   const loadCountries = async () => { const { data, error } = await supabase.from("countries").select("*"); if (!error && data) setCountries(data); };
   useEffect(() => { loadCountries(); }, []);
+  const [checks, setChecks] = useState({});
+  const loadChecks = async () => { const { data, error } = await supabase.from("checklist_state").select("*"); if (!error && data) { const m = {}; data.forEach((r) => { m[r.asset_id + "::" + r.item_key] = !!r.done; }); setChecks(m); } };
+  useEffect(() => { loadChecks(); }, []);
+  const toggleCheck = async (assetId, itemKey) => {
+    const k = assetId + "::" + itemKey; const next = !checks[k];
+    setChecks((p) => ({ ...p, [k]: next }));
+    const { error } = await supabase.from("checklist_state").upsert({ asset_id: assetId, item_key: itemKey, done: next, updated_at: new Date().toISOString() }, { onConflict: "asset_id,item_key" });
+    if (error) { setChecks((p) => ({ ...p, [k]: !next })); alert("Could not save: " + error.message); }
+  };
   const addCountry = async (c) => {
     const id = `C-${String(countries.length + 1).padStart(3, "0")}`;
     const { error } = await supabase.from("countries").insert([{ ...c, id }]);
@@ -561,6 +673,32 @@ export default function App({ session }) {
             </>
           )}
 
+          {section === "checklist" && (
+            <div className="space-y-4">
+              <p className="text-sm text-slate-500">Documentation required for each type of filing. Reference guide \u2014 to track progress, open an asset in Assets and use its filing checklist.</p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {CHECKLIST_TEMPLATES.map((t) => (
+                  <div key={t.key} className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                    <div className="font-semibold text-slate-800">{t.title}</div>
+                    <div className="text-xs text-slate-400">{t.sub}</div>
+                    <div className="inline-flex items-center gap-1 text-[11px] mt-2 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700"><Check size={11} /> Verified \u00b7 {t.src}</div>
+                    <div className="mt-3 space-y-1.5">
+                      {t.items.map((it) => (
+                        <div key={it.key} className="flex items-start gap-2 text-sm text-slate-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#44546A] mt-1.5 shrink-0" />
+                          <span>{it.label}</span>
+                          {it.tag && <span className="ml-auto text-[10px] text-[#941100] border border-[#941100]/30 bg-[#941100]/5 rounded px-1.5 shrink-0">{it.tag}</span>}
+                        </div>
+                      ))}
+                    </div>
+                    {t.note && <div className="text-[11px] text-slate-400 italic mt-2">{t.note}</div>}
+                  </div>
+                ))}
+              </div>
+              <div className="text-xs text-slate-400">Sources are the official offices (uspto.gov, copyright.gov, euipo.europa.eu, oepm.es, wipo.int, siae.it). General information, not legal advice.</div>
+            </div>
+          )}
+
           {section === "consult" && (
             <div className="max-w-2xl">
               <p className="text-sm text-slate-500 mb-3">Describe a creation: the app classifies the route, flags the clocks and suggests the next step. General screening, not legal advice.</p>
@@ -584,7 +722,7 @@ export default function App({ session }) {
         </div>
       </main>
 
-      {selected && <Detail a={selected} docs={docs} onClose={() => setSelected(null)} />}
+      {selected && <Detail a={selected} docs={docs} checks={checks} onToggleCheck={toggleCheck} onClose={() => setSelected(null)} />}
       {showNew && <NewAssetModal onClose={() => setShowNew(false)} onAdd={addAsset} />}
       {showNewDoc && <NewReportModal onClose={() => setShowNewDoc(false)} onAdd={addDoc} />}
       {showNewCountry && <NewCountryModal onClose={() => setShowNewCountry(false)} onAdd={addCountry} />}
