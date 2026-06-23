@@ -493,7 +493,7 @@ export default function App({ session }) {
   const stats = useMemo(() => {
     let granted = 0, filed = 0, audit = 0;
     assets.forEach((a) => { if (a.stage === "closed") granted++; else if (a.stage === "07_filing") filed++; else audit++; });
-    return { total: granted + filed, granted, filed, audit };
+    return { total: granted + filed + audit, granted, filed, audit };
   }, [assets]);
   const groups = useMemo(() => {
     const m = {};
