@@ -105,6 +105,7 @@ const FAMILIES = [
 ];
 
 const NAV = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutGrid },
   { key: "overview", label: "Overview", icon: LayoutGrid },
   { key: "portfolio", label: "Portfolio", icon: BookOpen },
   { key: "assets", label: "Assets", icon: Layers },
@@ -113,7 +114,7 @@ const NAV = [
   { key: "checklist", label: "Checklist", icon: ListChecks },
   { key: "consult", label: "AI Consultation", icon: Sparkles },
 ];
-const TITLES = { overview: "The ecosystem · IP portfolio", portfolio: "Portfolio · detail by family", assets: "Assets · full register", countries: "Countries · SSI Index coverage", reports: "Reports · supporting documents", checklist: "Checklist · filing documentation", consult: "AI Consultation — Mode A" };
+const TITLES = { dashboard: "Dashboard · visual summary", overview: "The ecosystem · IP portfolio", portfolio: "Portfolio · detail by family", assets: "Assets · full register", countries: "Countries · SSI Index coverage", reports: "Reports · supporting documents", checklist: "Checklist · filing documentation", consult: "AI Consultation — Mode A" };
 const DTYPES = ["", "us-grace-bar", "priority-12mo", "foreign-filing-30mo", "office-action-response", "copyright-timely-reg", "maintenance", "renewal", "other"];
 const ROUTE_FILTERS = [["all", "All"], ["patent", "Patents"], ["copyright", "Copyright"], ["trademark", "Trademarks"], ["trade-secret", "Trade secrets"]];
 
@@ -426,6 +427,39 @@ function NewCountryModal({ onClose, onAdd }) {
   );
 }
 
+function Donut({ data, size = 150 }) {
+  const total = data.reduce((s, d) => s + (d.value || 0), 0) || 1;
+  const r = 54, c = 2 * Math.PI * r; let acc = 0;
+  return (
+    <svg viewBox="0 0 140 140" width={size} height={size} className="shrink-0">
+      <g transform="rotate(-90 70 70)">
+        <circle cx="70" cy="70" r={r} fill="none" stroke="#eef0f3" strokeWidth="16" />
+        {data.map((d, i) => { const dash = (d.value / total) * c; const seg = (
+          <circle key={i} cx="70" cy="70" r={r} fill="none" stroke={d.color} strokeWidth="16"
+            strokeDasharray={`${dash} ${c - dash}`} strokeDashoffset={-acc} />); acc += dash; return seg; })}
+      </g>
+      <text x="70" y="67" textAnchor="middle" fontSize="24" fontWeight="700" fill="#44546A">{total}</text>
+      <text x="70" y="86" textAnchor="middle" fontSize="10" fill="#94a3b8">total</text>
+    </svg>
+  );
+}
+function Bars({ rows }) {
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  return (
+    <div className="space-y-2.5">
+      {rows.map((r, i) => (
+        <div key={i} className="flex items-center gap-2.5 text-xs">
+          <span className="w-32 shrink-0 text-slate-500 truncate">{r.label}</span>
+          <span className="flex-1 bg-slate-100 rounded h-4 relative overflow-hidden">
+            <span className="absolute left-0 top-0 bottom-0 rounded" style={{ width: `${(r.value / max) * 100}%`, background: r.color }} />
+          </span>
+          <span className="w-7 text-right font-semibold text-slate-700">{r.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function App({ session }) {
   const [assets, setAssets] = useState([]);
   const [docs, setDocs] = useState([]);
@@ -434,7 +468,7 @@ export default function App({ session }) {
   const [showNewCountry, setShowNewCountry] = useState(false);
   const [query, setQuery] = useState("");
   const openCountry = (name) => { setRouteFilter("all"); setQuery(name); setSelected(null); setSection("assets"); };
-  const [section, setSection] = useState("overview");
+  const [section, setSection] = useState("dashboard");
   const [selected, setSelected] = useState(null);
   const [showNew, setShowNew] = useState(false);
   const [routeFilter, setRouteFilter] = useState("all");
@@ -503,6 +537,36 @@ export default function App({ session }) {
     return Object.values(m).sort((x, y) => y.count - x.count);
   }, [assets]);
   const owners = useMemo(() => { const m = {}; assets.forEach((a) => { const o = a.owner || "—"; m[o] = (m[o] || 0) + 1; }); return Object.entries(m).sort((a, b) => b[1] - a[1]); }, [assets]);
+  const dash = useMemo(() => {
+    const catColor = { "USCO": "#44546A", "Patents (USPTO)": "#44546A", "Trademarks": "#941100", "SIAE (Italy)": "#7F7F7F", "Utility model": "#7F7F7F", "Patents (other)": "#374454", "Other": "#b9bdc4" };
+    const catOf = (a) => { const j = (a.jurisdiction || "").toUpperCase();
+      if (j.includes("USCO")) return "USCO";
+      if (j.includes("USPTO")) return "Patents (USPTO)";
+      if (j.includes("SIAE")) return "SIAE (Italy)";
+      if (j.includes("OEPM")) return "Utility model";
+      if (a.type === "trademark") return "Trademarks";
+      if (a.type === "patent") return "Patents (other)";
+      return "Other"; };
+    const cm = {}; assets.forEach((a) => { const c = catOf(a); cm[c] = (cm[c] || 0) + 1; });
+    const cats = Object.entries(cm).map(([label, value]) => ({ label, value, color: catColor[label] || "#44546A" })).sort((x, y) => y.value - x.value);
+    const ownerColors = ["#44546A", "#941100", "#7F7F7F", "#b9bdc4", "#d3d5da"];
+    const ownerSegs = owners.map(([label, value], i) => ({ label, value, color: ownerColors[i] || "#d3d5da" }));
+    const status = [
+      { label: "Filed / pending", value: stats.filed, color: "#7F7F7F" },
+      { label: "Registered / granted", value: stats.granted, color: "#44546A" },
+      { label: "In audit", value: stats.audit, color: "#b9bdc4" },
+    ];
+    let overdue = 0, d90 = 0, d365 = 0, later = 0, none = 0;
+    assets.forEach((a) => { const n = daysTo(a.key_deadline); if (n === null) none++; else if (n < 0) overdue++; else if (n <= 90) d90++; else if (n <= 365) d365++; else later++; });
+    const deadlines = [
+      { label: "Overdue", value: overdue, color: "#941100" },
+      { label: "Next 90 days", value: d90, color: "#941100" },
+      { label: "Next 12 months", value: d365, color: "#44546A" },
+      { label: "Later", value: later, color: "#7F7F7F" },
+      { label: "No date", value: none, color: "#d3d5da" },
+    ];
+    return { cats, ownerSegs, status, deadlines };
+  }, [assets, owners, stats]);
   const deadlines = useMemo(() => assets.filter((a) => a.key_deadline).sort((a, b) => daysTo(a.key_deadline) - daysTo(b.key_deadline)), [assets]);
   const reportDocs = useMemo(() => docs.filter((d) => !assets.some((a) => d.related_asset && d.related_asset.includes(a.id))), [docs, assets]);
   const list = useMemo(() => {
@@ -546,6 +610,53 @@ export default function App({ session }) {
         </div>
 
         <div className="px-8 pb-12">
+          {section === "dashboard" && (
+            <>
+              <Section n="1" title="Portfolio at a glance" sub="live from your records" />
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <Kpi label="Assets in total" value={stats.total} accent="border-[#44546A]" valueCls="text-[#44546A]" tint="bg-[#44546A]/5" />
+                <Kpi label="Granted / registered" value={stats.granted} accent="border-[#44546A]" valueCls="text-[#44546A]" tint="bg-[#44546A]/5" />
+                <Kpi label="Filed / pending" value={stats.filed} accent="border-[#7F7F7F]" valueCls="text-[#5f5f5f]" tint="bg-[#7F7F7F]/8" />
+                <Kpi label="In audit / in progress" value={stats.audit} accent="border-[#7F7F7F]" valueCls="text-[#5f5f5f]" dashed tint="bg-[#7F7F7F]/5" />
+              </div>
+
+              <Section n="2" title="Breakdown" sub="by category and owner" />
+              <div className="grid lg:grid-cols-2 gap-4">
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                  <h3 className="font-bold text-slate-800 mb-3">Assets by category</h3>
+                  <Bars rows={dash.cats} />
+                </div>
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                  <h3 className="font-bold text-slate-800 mb-3">Assets by owner</h3>
+                  <div className="flex items-center gap-5">
+                    <Donut data={dash.ownerSegs} />
+                    <div className="space-y-2 text-sm flex-1 min-w-0">
+                      {dash.ownerSegs.map((o, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <span className="w-3 h-3 rounded-sm shrink-0" style={{ background: o.color }} />
+                          <span className="text-slate-700 truncate">{o.label}</span>
+                          <span className="ml-auto font-semibold text-slate-800">{o.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Section n="3" title="Status & deadlines" sub="where things stand" />
+              <div className="grid lg:grid-cols-2 gap-4">
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                  <h3 className="font-bold text-slate-800 mb-3">Assets by status</h3>
+                  <Bars rows={dash.status} />
+                </div>
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+                  <h3 className="font-bold text-slate-800 mb-3">Upcoming deadlines</h3>
+                  <Bars rows={dash.deadlines} />
+                </div>
+              </div>
+            </>
+          )}
+
           {section === "overview" && (
             <>
               <Section n="1" title="The products" sub="how they stack" />
